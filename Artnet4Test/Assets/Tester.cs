@@ -7,61 +7,38 @@ using System.Net.Sockets;
 
 public class Tester : MonoBehaviour
 {
-    UdpClient client;
-    IPEndPoint IPEnd;
-    IPEndPoint IPEndBroadcastPoll;
-    public byte[] _data;
-    public byte[] _data_PollRequest;
-    public byte[] _data_PollRequestReply;
+    IPAddress IP_ArtnetNode1;
 
-    public float ArtPollTimer = 0;
+    private byte[] _data;
+    private float elapsedTime;
+    public float speed;
 
     ArtnetForUnity.ArtnetManager artnetManager;
     public void Start()
     {
+        _data = new byte[512];
         //client = new UdpClient();
         artnetManager = new ArtnetForUnity.ArtnetManager();
-        ArtnetForUnity.ArtDmx artnet = new ArtnetForUnity.ArtDmx();
-        ArtnetForUnity.ArtPoll artPoll = new ArtnetForUnity.ArtPoll();
-        ArtnetForUnity.ArtPollReply artPollreply = new ArtnetForUnity.ArtPollReply();
-        byte[] data = new byte[] { 0xff, 0xff, 0xff, 0xff };
-        _data = artnet.CreateArtDmxPacket(data, 0, 0);
-        artPoll._PriorityCodes = ArtnetForUnity.PriorityCodes.DpCritical;
-        _data_PollRequest = artPoll.CreateArtPollPacket();
-        _data_PollRequestReply = artPollreply.CreateArtPollPacket();
-        //IPEnd = new IPEndPoint(new IPAddress(new byte[] { 127, 0, 0, 1 }), 0x1936);
-        //IPEndBroadcastPoll = new IPEndPoint(new IPAddress(new byte[] { 2, 255, 255, 255 }), 0x1936);
-        //client.Send(_data, _data.Length, IPEnd);
-        //CheckArtPoll();
+        artnetManager.Start(1);
+
+        IP_ArtnetNode1 = new IPAddress(new byte[] { 2, 161, 30, 77 });
     }
 
     private void OnDestroy()
     {
+        artnetManager.Stop();
         artnetManager.Dispose();
     }
 
 
     public void Update()
     {
-        CheckArtPoll();
-        //client.Send(_data, _data.Length, IPEnd);
+        elapsedTime += (Time.deltaTime * speed);
+        int sine = (int)(((Mathf.Sin(elapsedTime) +1f)/2f)*255f);
+        for(int i = 0; i < _data.Length; i++) {
+            _data[i] = (byte)sine;
+        }
+        artnetManager.SetArtnetData(0, _data, 1);
     }
 
-    private void CheckArtPoll()
-    {
-        ArtPollTimer -= Time.deltaTime;
-        if (ArtPollTimer > 0) return;
-        ArtPollTimer = 2.8f;
-        //client.Send(_data_PollRequest, _data_PollRequest.Length, IPEndBroadcastPoll);
-        ArtnetForUnity.IPPacket pkt = new ArtnetForUnity.IPPacket();
-        pkt.ipAddress = ArtnetForUnity.ArtUtils.broadcastAddress;
-        pkt.pktData = _data_PollRequest;
-        pkt.opCode = ArtnetForUnity.OpCodes.OpPoll;
-        artnetManager.AddSenderPkt(pkt);
-        ArtnetForUnity.IPPacket pkt_reply = new ArtnetForUnity.IPPacket();
-        pkt_reply.ipAddress = ArtnetForUnity.ArtUtils.InterfaceIPAddress;
-        pkt_reply.pktData = _data_PollRequestReply;
-        pkt_reply.opCode = ArtnetForUnity.OpCodes.OpPollReply;
-        artnetManager.AddSenderPkt(pkt_reply);
-    }
 }

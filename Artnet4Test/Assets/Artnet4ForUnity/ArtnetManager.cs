@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -23,6 +24,7 @@ namespace ArtnetForUnity
             init();
             new Thread(SenderThread) { IsBackground = true }.Start();
             new Thread(ListenerThread) { IsBackground = true }.Start();
+          
         }
 
         static UdpClient udpClient;
@@ -30,13 +32,14 @@ namespace ArtnetForUnity
 
         static IPEndPoint endPointSend = new IPEndPoint(IPAddress.Any, ArtUtils.ArtnetPort);
         static IPEndPoint endPointRecv = new IPEndPoint(IPAddress.Any, ArtUtils.ArtnetPort);
-        static bool shouldRun;
+        static bool isArtnetActive;
         private readonly BlockingCollection<IPPacket> SendQueue = new BlockingCollection<IPPacket>(new ConcurrentQueue<IPPacket>());
         private readonly BlockingCollection<IPPacket> ListenQueue = new BlockingCollection<IPPacket>(new ConcurrentQueue<IPPacket>());
         public delegate void ReceiveCallBack();
         public event ReceiveCallBack RecvCallBack;
 
         public static List<ArtnetDevice> deviceList = new List<ArtnetDevice>();
+
 
         private void init()
         {
@@ -54,8 +57,125 @@ namespace ArtnetForUnity
             udpRevcClient.Client.Bind(endPointRecv);
 
             RecvCallBack += Recv_Callback;
+            
+
+        }
+
+        public byte[] _data_PollRequest;
+        public byte[] _data_PollRequestReply;
+
+        private static ArtnetForUnity.ArtDMXPacket[] ArtnetUniverseValues;
+
+        public void Start(int universesArrayAmount)
+        {
+            isArtnetActive = true;
+            ArtnetForUnity.ArtDmx artnet = new ArtnetForUnity.ArtDmx();
+            ArtnetForUnity.ArtPoll artPoll = new ArtnetForUnity.ArtPoll();
+            ArtnetForUnity.ArtPollReply artPollreply = new ArtnetForUnity.ArtPollReply();
+            artPoll._PriorityCodes = ArtnetForUnity.PriorityCodes.DpMed;
+            _data_PollRequest = artPoll.CreateArtPollPacket();
+            _data_PollRequestReply = artPollreply.CreateArtPollPacket();
+
+            ArtnetUniverseValues = new ArtnetForUnity.ArtDMXPacket[universesArrayAmount];
+            new Thread(ArtnetThreadLoop) { IsBackground = true }.Start();
+        }
+
+        public void SetArtnetData(int universesArrayIndex, byte[] UniverseData, int Universe, IPAddress[] address = null)
+        {
+            if(address == null) { address = new IPAddress[] { ArtUtils.broadcastAddress }; }
+            ArtnetForUnity.ArtDMXPacket pkt = new ArtnetForUnity.ArtDMXPacket();
+            pkt.iPAddress = address;
+            pkt.data = UniverseData;
+            pkt.Universe = Universe;
+            ArtnetUniverseValues[universesArrayIndex] = pkt;
 
 
+        }
+
+        private void ArtnetThreadLoop()
+        {
+            ArtDmx dmxPkt = new ArtDmx();
+            ArtnetForUnity.IPPacket pkt = new IPPacket();
+            Stopwatch timer= new Stopwatch();
+            Stopwatch ArtnetPollTimer= new Stopwatch();
+            int millisecondsToSleep = 0;
+            ArtnetPollTimer.Start();
+            timer.Start();
+            UnityEngine.Debug.Log("Main Loop Thread Started");
+            while (isArtnetActive)
+            {
+              
+                if (ArtnetUniverseValues == null)
+                {
+                   
+                    return;
+                }
+            
+                //Send DMX
+                if (ArtnetUniverseValues != null)
+                    try
+                    {
+                      
+                        for (int i = 0; i < ArtnetUniverseValues.Length; i++)
+                        {
+                           
+                            if (ArtnetUniverseValues[i].data == null || ArtnetUniverseValues[i].data.Length == 0) continue;
+                            //pkt = new ArtnetForUnity.IPPacket();
+                           
+                            pkt.opCode = ArtnetForUnity.OpCodes.OpDmx;
+                            pkt.pktData = dmxPkt.CreateArtDmxPacket(ArtnetUniverseValues[i].data, ArtnetUniverseValues[i].Universe);
+                            for (int _ipIndex = 0; _ipIndex < ArtnetUniverseValues[i].iPAddress.Length; _ipIndex++)
+                            {
+                                ;
+                                pkt.ipAddress = ArtnetUniverseValues[i].iPAddress[_ipIndex];
+                                AddSenderPkt(pkt);
+                              
+                            }
+                          
+
+
+                        }
+                    }catch(Exception e)
+                    {
+                        UnityEngine.Debug.LogError(e);
+                    }
+             
+                //ArtPoll
+                if (ArtnetPollTimer.Elapsed.TotalMilliseconds > 2800)
+                { //2.8Seconds
+                    //Poll
+                    pkt.ipAddress = ArtnetForUnity.ArtUtils.broadcastAddress;
+                    pkt.pktData = _data_PollRequest;
+                    pkt.opCode = ArtnetForUnity.OpCodes.OpPoll;
+                    AddSenderPkt(pkt);
+                    //Internal Reply
+                    pkt.ipAddress = ArtnetForUnity.ArtUtils.InterfaceIPAddress;
+                    pkt.pktData = _data_PollRequestReply;
+                    pkt.opCode = ArtnetForUnity.OpCodes.OpPollReply;
+                    AddSenderPkt(pkt);
+                    ArtnetPollTimer.Restart();
+
+                }
+                //Calculate loop time
+                timer.Stop();
+                if (timer.ElapsedMilliseconds > 22){ millisecondsToSleep = 0; } else { millisecondsToSleep = (22 - (int)timer.ElapsedMilliseconds); }
+           
+                Thread.Sleep(millisecondsToSleep);
+               
+                timer.Restart();
+            }
+            UnityEngine.Debug.Log("[Art-Net] Main Loop Thread Finish");
+            ArtnetPollTimer.Stop();
+        }
+
+        public void Stop()
+        {
+            isArtnetActive = false;
+        }
+
+        private void SendArtPoll()
+        {
+          
         }
 
         private void Recv_Callback()
@@ -125,6 +245,7 @@ namespace ArtnetForUnity
         public void Dispose()
         {
             // this will "complete" GetConsumingEnumerable, so your thread will complete
+            isArtnetActive = false;
             SendQueue.CompleteAdding();
             SendQueue.Dispose();
             ListenQueue.CompleteAdding();

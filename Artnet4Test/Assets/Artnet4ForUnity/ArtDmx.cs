@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.Net;
+
 namespace ArtnetForUnity
 {
     public class ArtDmx
@@ -74,6 +76,13 @@ namespace ArtnetForUnity
             Array.Copy(pkt_LengthLo, 0, pkt_fullReturn, 17, pkt_LengthLo.Length);
             Array.Copy(pkt_Data, 0, pkt_fullReturn, 18, pkt_Data.Length);
         }
+    }
+
+    public struct ArtDMXPacket
+    {
+        public byte[] data;
+        public int Universe;
+        public IPAddress[] iPAddress;
     }
 
    
