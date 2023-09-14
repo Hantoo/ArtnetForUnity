@@ -1,7 +1,7 @@
 # ArtnetForUnity
 
 ## What is this? - And why another Artnet Lib?
-This is a project to implement Art-Net4 into Unity. I have used alot of different artnet libaries for Unity before and have not found one which has been really nice to use.
+This is a project to implement Art-Net4 into Unity. I have used alot of different artnet libaries for Unity before and have not found one which has been really nice to use and simple to implement.
 
 ## Usage 
 Included in the project is a Tester.cs script which shows you exactly how to use it. It is a very simple setup. 
