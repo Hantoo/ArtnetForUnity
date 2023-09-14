@@ -8,7 +8,11 @@ This is a project to implement Art-Net4 into Unity. I have used alot of differen
 Currently Implemented Artnet 4 Features (Will be implementing more features of Art-Net4)
 | ArtDMX | ArtPoll    | ArtPollReply    |  ArtTrigger     |  ArtSync   |   ArtInput   |  ArtRDM   |  ArtVlc  | ArtCommand | ArtTimecode |
 | :---:   | :---: | :---: |:---: |:---: |:---: |:---: |:---: |:---: |:---: |
-| ✅ | ✅   | ✅   | ❌   |  ❌  | ❌ | ❌ | ❌ | ❌ | ❌ |
+| ✅ | ✅   | ⏳  | ❌   |  ❌  | ❌ | ❌ | ❌ | ❌ | ❌ |
+
+✅ = Fully Implemented 
+⏳ = Partly Implemented 
+❌ = Not Implemented Yet
 
 ## Usage 
 Included in the project is a Tester.cs script which shows you exactly how to use it. It is a very simple setup. 
