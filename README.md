@@ -48,3 +48,8 @@ We have the index number as 0 since we only initalised 1 universe above, therefo
     
 Image above shows the UI panel, found under Artnet > General Settings. From here you can choose the NIC that Art-Net uses as well as the Art-Net complient nodes found on the network.
 The nodes status update every 4 seconds. 
+
+
+## External Packages Used
+* Newtonsoft Json (com.unity.nuget.newtonsoft-json)
+* Editor Coroutines (com.unity.editorcoroutines)
