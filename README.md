@@ -46,8 +46,9 @@ We have the index number as 0 since we only initalised 1 universe above, therefo
     artnetManager.SetArtnetData(0, _data, 1);
 ```
 ## Screenshots
-<img width="499" alt="Screenshot 2023-09-12 103735" src="https://github.com/Hantoo/ArtnetForUnity/assets/1647342/828122e3-1601-411f-bced-dfcd3afed84a">    
-    
+
+<img width="499" alt="Screenshot 2023-09-12 103735" src="https://github.com/Hantoo/ArtnetForUnity/assets/1647342/8ec5ec88-965f-457a-a6a1-76e8dd215e68">
+
 Image above shows the UI panel, found under Artnet > General Settings. From here you can choose the NIC that Art-Net uses as well as the Art-Net complient nodes found on the network.
 The nodes status update every 4 seconds. 
 
