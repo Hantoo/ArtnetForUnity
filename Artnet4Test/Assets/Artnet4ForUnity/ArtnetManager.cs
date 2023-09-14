@@ -197,7 +197,8 @@ namespace ArtnetForUnity
         public void AddSenderPkt(IPPacket pkt)
         {
             if(pkt.opCode == OpCodes.OpPoll) { RefreshDeviceList(); }
-            SendQueue.Add(pkt);
+            if (SendQueue != null)
+                SendQueue.Add(pkt);
             //Debug.Log("deviceList Count:" + deviceList.Count);
         }
 
@@ -233,9 +234,11 @@ namespace ArtnetForUnity
                 pkt.pktData = udpRevcClient.Receive(ref endPointRecv);
                 pkt.ipAddress = endPointRecv.Address;
                 pkt.opCode = ArtUtils.ByteToOpCode(pkt.pktData[8], pkt.pktData[9]);
-
-                ListenQueue.Add(pkt);
-                RecvCallBack?.Invoke();
+                if (ListenQueue != null)
+                {
+                    ListenQueue.Add(pkt);
+                    RecvCallBack?.Invoke();
+                }
                 //}
 
             }

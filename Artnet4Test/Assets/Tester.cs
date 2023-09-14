@@ -38,6 +38,11 @@ public class Tester : MonoBehaviour
         for(int i = 0; i < _data.Length; i++) {
             _data[i] = (byte)sine;
         }
+
+        //Send Artnet to Direct IP Addresses 
+        //artnetManager.SetArtnetData(0, _data, 1, new IPAddress[] { new IPAddress(new byte[] { 2, 0, 0, 102 }), new IPAddress(new byte[] { 2, 0, 0, 101 }) } );
+
+        //Broadcast Artnet 
         artnetManager.SetArtnetData(0, _data, 1);
     }
 

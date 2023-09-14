@@ -160,8 +160,9 @@ namespace ArtnetForUnity
             if (exists) { return ip; } else
             {
                 Debug.LogError("Network Interface Changed");
-                UnicastIPAddressInformationCollection UnicastIPInfoCol = Interfaces[0].GetIPProperties().UnicastAddresses;
-                return UnicastIPInfoCol[0].Address;
+                
+                Debug.LogError("Changing Art-Net Interface to use IP 127.0.0.1" );
+                return new IPAddress(new byte[] { 127,0,0,1 });
             }
         }
 
@@ -218,7 +219,8 @@ namespace ArtnetForUnity
 
             }
 
-            throw new ArgumentException("Can't Find NIC with specified IP for Artnet.");
+            return new IPAddress(new byte[] { 255, 0, 0, 0 });
+            //throw new ArgumentException("Can't Find NIC with specified IP for Artnet.");
             ///return null;
 
         }
