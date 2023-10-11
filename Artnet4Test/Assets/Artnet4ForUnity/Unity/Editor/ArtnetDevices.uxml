@@ -1,5 +1,5 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <ui:Label tabindex="-1" text="Name" display-tooltip-when-elided="true" binding-path="name" name="Label_Name" style="width: 333px; border-left-width: 11px;" />
-    <ui:Label tabindex="-1" text="Label" display-tooltip-when-elided="true" name="Label_IP" style="height: 26px; width: 190px; position: absolute; top: 0; left: 154px; -unity-text-align: upper-right; -unity-font-style: italic;" />
+    <ui:Button text="Button" display-tooltip-when-elided="true" name="Label_IP" style="height: 19px; width: 127px; top: 0; bottom: 69px; right: 0; position: absolute; border-left-color: rgb(149, 149, 149); border-right-color: rgb(149, 149, 149); border-top-color: rgb(149, 149, 149); border-bottom-color: rgb(149, 149, 149); background-color: rgba(188, 188, 188, 0.49); -unity-text-outline-color: rgb(0, 0, 0); cursor: initial;" />
+    <ui:Label tabindex="-1" text="Name" display-tooltip-when-elided="true" binding-path="name" name="Label_Name" style="width: 210px; border-left-width: 11px; height: 24px;" />
     <ui:VisualElement name="VisualEl_ConnectionStatus" style="flex-grow: 1; background-color: rgb(34, 34, 34); position: absolute; height: 28px; width: 4px; top: 3px; left: 2px;" />
 </ui:UXML>

@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net;
+using System.Text;
 using UnityEngine;
 
 namespace ArtnetForUnity
@@ -30,7 +32,7 @@ namespace ArtnetForUnity
         byte[] pkt_NumPortsLo = new byte[1];    //Offset 173 
         byte[] pkt_PortTypes = new byte[4];    //Offset 174 
         byte[] pkt_GoodInput = new byte[4];    //Offset 178 
-        byte[] pkt_GoodOutputA = new byte[4];    //Offset 182 
+        byte[] pkt_GoodOutput = new byte[4];    //Offset 182 
         byte[] pkt_SwIn = new byte[4];    //Offset 186 
         byte[] pkt_SwOut = new byte[4];    //Offset 190 
         byte[] pkt_AcnPriority = new byte[1];    //Offset 194 
@@ -72,6 +74,7 @@ namespace ArtnetForUnity
         public PortTypes_Type portTypes_Type;
         public PortTypes_PortCanInputToArtnetNetwork portTypes_PortCanInputToArtnetNetwork;
         public PortTypes_PortCanOutputDataFromArtnetNetwork portTypes_PortCanOutputDataFromArtnetNetwork;
+        static int ArtPollReplyCounter = 0;
         public byte[] CreateArtPollPacket()
         {
             status1_IndicatorState = Status1_IndicatorState.Unknown;
@@ -104,7 +107,13 @@ namespace ArtnetForUnity
             Array.Copy(pkt_PortName, 0, pkt_LongName, 0, pkt_PortName.Length);
             //pkt_NodeReport
             NodeReport report = NodeReport.RcPowerOk;
-            byte[] reportbytes = new byte[] { 0x23, 0x00, 0x00, 0x00, 0x01, 0x5b, 0x00, 0x00, 0x00, 0x00, 0x5d, 0x00, 0x00, 0x00, 0x00 };
+            byte[] reportbytes = new byte[64];
+            string nodeReportCodeString = ((int)report).ToString("0000");
+            byte[] nodeReportCodeByte = Encoding.ASCII.GetBytes(nodeReportCodeString);
+            string ArtPollReplyCounterString = ArtPollReplyCounter.ToString("0000");
+            byte[] ArtPollReplyCounterByte = Encoding.ASCII.GetBytes(ArtPollReplyCounterString);
+            byte[] reportbytes_test = new byte[] { 0x23, nodeReportCodeByte[0], nodeReportCodeByte[1], nodeReportCodeByte[2], nodeReportCodeByte[3], 0x20, 0x5b, ArtPollReplyCounterByte[0] , ArtPollReplyCounterByte[1], ArtPollReplyCounterByte[2] , ArtPollReplyCounterByte[3], 0x5d, 0x20, 0x00, 0x00, 0x00, 0x00 };
+            Array.Copy(reportbytes_test, 0, reportbytes, 0, reportbytes_test.Length);
             Array.Copy(reportbytes, 0, pkt_NodeReport, 0, reportbytes.Length);
             //--
             pkt_NumPortsHi[0] = 0x00;
@@ -129,6 +138,7 @@ namespace ArtnetForUnity
             pkt_Style[0] = (byte)StyleCode.StController;
             pkt_Mac = ArtUtils.InterfaceMacAddress.GetAddressBytes();
             CompilePacket();
+            ArtPollReplyCounter = ArtPollReplyCounter + 1;
             return pkt_fullReturn;
         }
 
@@ -157,7 +167,7 @@ namespace ArtnetForUnity
             Array.Copy(pkt_NumPortsLo, 0, pkt_fullReturn, 173, pkt_NumPortsLo.Length);
             Array.Copy(pkt_PortTypes, 0, pkt_fullReturn, 174, pkt_PortTypes.Length);
             Array.Copy(pkt_GoodInput, 0, pkt_fullReturn, 178, pkt_GoodInput.Length);
-            Array.Copy(pkt_GoodOutputA, 0, pkt_fullReturn, 182, pkt_GoodOutputA.Length);
+            Array.Copy(pkt_GoodOutput, 0, pkt_fullReturn, 182, pkt_GoodOutput.Length);
             Array.Copy(pkt_SwIn, 0, pkt_fullReturn, 186, pkt_SwIn.Length);
             Array.Copy(pkt_SwOut, 0, pkt_fullReturn, 190, pkt_SwOut.Length);
             Array.Copy(pkt_AcnPriority, 0, pkt_fullReturn, 194, pkt_AcnPriority.Length);
@@ -176,6 +186,173 @@ namespace ArtnetForUnity
             byte[] PortName = new byte[18];
             Array.Copy(data,26, PortName, 0, 18);
             return System.Text.Encoding.ASCII.GetString(PortName);
+        }
+
+
+        public struct GoodInput
+        {
+            public void ParseByteToGoodInput(byte GoodInputValue)
+            {
+                if (ArtUtils.IsBitSet(GoodInputValue,7)) { dataRecieved = GoodInput_DataRecieved.DataReceieved; } else { dataRecieved = GoodInput_DataRecieved.NoData; }
+                if (ArtUtils.IsBitSet(GoodInputValue, 6)) { incDMXTestPkts = GoodInput_IncDMXTestPkts.TestPacketsIncluded; } else { incDMXTestPkts = GoodInput_IncDMXTestPkts.NoTestPackets; }
+                if (ArtUtils.IsBitSet(GoodInputValue, 5)) { incDMXSIPPkts = GoodInput_IncDMXSIPPkts.SIPPacketsIncluded; } else { incDMXSIPPkts = GoodInput_IncDMXSIPPkts.NoSIPPackets; }
+                if (ArtUtils.IsBitSet(GoodInputValue, 4)) { incDMXTextPkts = GoodInput_IncDMXTextPkts.TextPacketsIncluded; } else { incDMXTextPkts = GoodInput_IncDMXTextPkts.NoTextPackets; }
+                if (ArtUtils.IsBitSet(GoodInputValue, 3)) { inputDisabled = GoodInput_InputDisabled.Disabled; } else { inputDisabled = GoodInput_InputDisabled.Enabled; }
+                if (ArtUtils.IsBitSet(GoodInputValue, 2)) { recieveErrorsDetected = GoodInput_RecieveErrorsDetected.ErrorsDetected; } else { recieveErrorsDetected = GoodInput_RecieveErrorsDetected.NoErrors; }
+                // if (ArtUtils.IsBitSet(GoodInputValue, 1)) { NOT USED }
+                // if (ArtUtils.IsBitSet(GoodInputValue, 0)) { NOT USED }
+            }
+
+            public byte GoodInputToByte()
+            {
+                int returnValue = 0;
+                if (dataRecieved == GoodInput_DataRecieved.DataReceieved) returnValue += 128;
+                if (incDMXTestPkts == GoodInput_IncDMXTestPkts.TestPacketsIncluded) returnValue += 64;
+                if (incDMXSIPPkts == GoodInput_IncDMXSIPPkts.SIPPacketsIncluded) returnValue += 32;
+                if (incDMXTextPkts == GoodInput_IncDMXTextPkts.TextPacketsIncluded) returnValue += 16;
+                if (inputDisabled == GoodInput_InputDisabled.Disabled) returnValue += 8;
+                if (recieveErrorsDetected == GoodInput_RecieveErrorsDetected.ErrorsDetected) returnValue += 4;
+
+                return (byte)returnValue;
+            }
+
+            public byte byteValue;
+            public GoodInput_DataRecieved dataRecieved;
+            public GoodInput_IncDMXTestPkts incDMXTestPkts;
+            public GoodInput_IncDMXSIPPkts incDMXSIPPkts;
+            public GoodInput_IncDMXTextPkts incDMXTextPkts;
+            public GoodInput_InputDisabled inputDisabled;
+            public GoodInput_RecieveErrorsDetected recieveErrorsDetected;
+
+            public enum GoodInput_RecieveErrorsDetected
+            {
+                //128,64,32,16,8,4,2,1
+                ErrorsDetected = 4,
+                NoErrors = 0
+            }
+
+            public enum GoodInput_InputDisabled
+            {
+                Disabled = 8,
+                Enabled = 0
+            }
+
+            public enum GoodInput_IncDMXTextPkts
+            {
+                TextPacketsIncluded = 16,
+                NoTextPackets = 0
+            }
+
+            public enum GoodInput_IncDMXSIPPkts
+            {
+                SIPPacketsIncluded = 32,
+                NoSIPPackets = 0
+            }
+
+            public enum GoodInput_IncDMXTestPkts
+            {
+                TestPacketsIncluded = 64,
+                NoTestPackets = 0
+            }
+
+            public enum GoodInput_DataRecieved
+            {
+                DataReceieved = 128,
+                NoData = 0
+            }
+        }
+
+        public struct GoodOutput
+        {
+            public void ParseByteToGoodInput(byte GoodOutputValue)
+            {
+                if (ArtUtils.IsBitSet(GoodOutputValue, 7)) { DMXOutput = GoodOutput_ArtDmxOrScanOutput.ArtDmxOrsACNOutputAsDMX; } else { DMXOutput = GoodOutput_ArtDmxOrScanOutput.NoArtDMXorsACN; }
+                if (ArtUtils.IsBitSet(GoodOutputValue, 6)) { incDMXTestPkts = GoodOutput_IncDMXTestPkts.TestPacketsIncluded; } else { incDMXTestPkts = GoodOutput_IncDMXTestPkts.NoTestPackets; }
+                if (ArtUtils.IsBitSet(GoodOutputValue, 5)) { incDMXSIPPkts = GoodOutput_IncDMXSIPPkts.SIPPacketsIncluded; } else { incDMXSIPPkts = GoodOutput_IncDMXSIPPkts.NoSIPPackets; }
+                if (ArtUtils.IsBitSet(GoodOutputValue, 4)) { incDMXTextPkts = GoodOutput_IncDMXTextPkts.TextPacketsIncluded; } else { incDMXTextPkts = GoodOutput_IncDMXTextPkts.NoTextPackets; }
+                if (ArtUtils.IsBitSet(GoodOutputValue, 3)) { mergeArtnet = GoodOutput_OutputMergingArtNetData.IsMerging; } else { mergeArtnet = GoodOutput_OutputMergingArtNetData.IsNotMerging; }
+                if (ArtUtils.IsBitSet(GoodOutputValue, 2)) { dMXShort = GoodOutput_DMXOutputShort.OutputShorted; } else { dMXShort = GoodOutput_DMXOutputShort.NoShort; }
+                if (ArtUtils.IsBitSet(GoodOutputValue, 1)) { lTPMerge = GoodOutput_LTPMergeMode.LTPMerge; } else { lTPMerge = GoodOutput_LTPMergeMode.NoLTPMerge; }
+                if (ArtUtils.IsBitSet(GoodOutputValue, 0)) { outputProtocol = GoodOutput_Output.TransmitsACN; } else { outputProtocol = GoodOutput_Output.TransmitsArtNet; }
+     
+            }
+
+            public byte GoodInputToByte()
+            {
+                int returnValue = 0;
+                if (DMXOutput == GoodOutput_ArtDmxOrScanOutput.ArtDmxOrsACNOutputAsDMX) returnValue += 128;
+                if (incDMXTestPkts == GoodOutput_IncDMXTestPkts.TestPacketsIncluded) returnValue += 64;
+                if (incDMXSIPPkts == GoodOutput_IncDMXSIPPkts.SIPPacketsIncluded) returnValue += 32;
+                if (incDMXTextPkts == GoodOutput_IncDMXTextPkts.TextPacketsIncluded) returnValue += 16;
+                if (mergeArtnet == GoodOutput_OutputMergingArtNetData.IsMerging) returnValue += 8;
+                if (dMXShort == GoodOutput_DMXOutputShort.OutputShorted) returnValue += 4;
+                if (lTPMerge == GoodOutput_LTPMergeMode.LTPMerge) returnValue += 2;
+                if (outputProtocol == GoodOutput_Output.TransmitsACN) returnValue += 1;
+
+                return (byte)returnValue;
+            }
+
+            public byte byteValue;
+            public GoodOutput_ArtDmxOrScanOutput DMXOutput;
+            public GoodOutput_IncDMXTestPkts incDMXTestPkts;
+            public GoodOutput_IncDMXSIPPkts incDMXSIPPkts;
+            public GoodOutput_IncDMXTextPkts incDMXTextPkts;
+            public GoodOutput_OutputMergingArtNetData mergeArtnet;
+            public GoodOutput_DMXOutputShort dMXShort;
+            public GoodOutput_LTPMergeMode lTPMerge;
+            public GoodOutput_Output outputProtocol;
+
+            public enum GoodOutput_ArtDmxOrScanOutput
+            {
+                //128,64,32,16,8,4,2,1
+                ArtDmxOrsACNOutputAsDMX = 128,
+                NoArtDMXorsACN = 0
+            }
+
+            public enum GoodOutput_IncDMXTestPkts
+            {
+                TestPacketsIncluded = 64,
+                NoTestPackets = 0
+            }
+
+
+           
+            public enum GoodOutput_IncDMXSIPPkts
+            {
+                SIPPacketsIncluded = 32,
+                NoSIPPackets = 0
+            }
+
+            public enum GoodOutput_IncDMXTextPkts
+            {
+                TextPacketsIncluded = 16,
+                NoTextPackets = 0
+            }
+
+
+            public enum GoodOutput_OutputMergingArtNetData
+            {
+                IsMerging = 8,
+                IsNotMerging = 0
+            }
+
+            public enum GoodOutput_DMXOutputShort
+            {
+                OutputShorted = 4,
+                NoShort = 0
+            }
+
+            public enum GoodOutput_LTPMergeMode
+            {
+                LTPMerge = 2,
+                NoLTPMerge = 0
+            }
+
+            public enum GoodOutput_Output
+            {
+                TransmitsACN = 2,
+                TransmitsArtNet = 0
+            }
         }
 
 
@@ -239,6 +416,84 @@ namespace ArtnetForUnity
             //128,64,32,16,8,4,2,1
             True = 64,
             False = 0
+        }
+
+        public struct ReadableArtPoll
+        {
+            public IPAddress iPAddress;
+            public int port;
+            public int version;
+            public int PortAddress;
+            public int NetSwitch;
+            public int SubSwitch;
+            public int ESTAManufactureCode;
+            public string PortName;
+            public string LongName;
+            public ReadableNodeReport[] nodeReport;
+            public int NodeOutputPortAmount;
+            public int NodeInputPortAmount;
+            public int OEMCode;
+            public int UbeaVersion;
+            public Status1 status1;
+            public GoodInput[] goodInputs;
+            public GoodOutput[] goodOutputs;
+        }
+
+        public struct ReadableNodeReport
+        {
+            
+            public void ParseNodeReport(byte[] pktData)
+            {
+                 char counterStartChar = '[';
+                char counterEndChar = ']';
+                int counterStartPos = -1;
+                int counterendPos = -1;
+                for(int i = 0; i < pktData.Length; i++)
+                {
+                    if (pktData[i] == (byte)counterStartChar) counterStartPos = i;
+                    if (pktData[i] == (byte)counterEndChar) counterendPos = i;
+                    //Node Report Code
+                    byte[] NodeReportCode = new byte[4];
+                    Array.Copy(pktData, 1, NodeReportCode, 0, 4);
+                    Int32 value = BitConverter.ToInt32(NodeReportCode);
+                    nodeReportFeedback = (NodeReport)value;
+
+                    //ArtPollResponse Counter
+                    byte[] ArtPollResponseTick = new byte[4];
+                    Array.Copy(pktData, counterStartPos + 1, ArtPollResponseTick, 0, 4);
+                    Int32 ArtPollCounter = BitConverter.ToInt32(ArtPollResponseTick);
+                    ArtPollResponseCounter = ArtPollCounter;
+
+                    //Message
+                    byte[] TextArray = new byte[54];
+                    Array.Copy(pktData, counterendPos+1, TextArray, 0, 4);
+                    message = System.Text.Encoding.ASCII.GetString(TextArray);
+                }
+
+
+            //byte Pos 1 = Error Code. byte Pos 7 = Counter 
+        }
+
+            public NodeReport nodeReportFeedback;
+            public Int32 ArtPollResponseCounter;
+            public string message;
+        }
+
+      
+        public struct Status1
+        {
+            public void status1UnPack(byte byteval)
+            {
+
+            }
+            public Status1_FirmwareBoot firmwareBoot;
+            public Status1_IndicatorState indicatorState;
+            public Status1_PortAddressProgrammingAuthority portProgramming;
+            public Status1_RDM rDM;
+            public Status1_UBEA uBEA;
+     
+
+
         }
     }
 }

@@ -39,7 +39,9 @@ namespace ArtnetForUnity
         public event ReceiveCallBack RecvCallBack;
 
         public static List<ArtnetDevice> deviceList = new List<ArtnetDevice>();
-
+        ArtnetForUnity.ArtDmx artnet;
+        ArtnetForUnity.ArtPoll artPoll;
+        ArtnetForUnity.ArtPollReply artPollreply;
 
         private void init()
         {
@@ -69,9 +71,9 @@ namespace ArtnetForUnity
         public void Start(int universesArrayAmount)
         {
             isArtnetActive = true;
-            ArtnetForUnity.ArtDmx artnet = new ArtnetForUnity.ArtDmx();
-            ArtnetForUnity.ArtPoll artPoll = new ArtnetForUnity.ArtPoll();
-            ArtnetForUnity.ArtPollReply artPollreply = new ArtnetForUnity.ArtPollReply();
+            artnet = new ArtnetForUnity.ArtDmx();
+            artPoll = new ArtnetForUnity.ArtPoll();
+            artPollreply = new ArtnetForUnity.ArtPollReply();
             artPoll._PriorityCodes = ArtnetForUnity.PriorityCodes.DpMed;
             _data_PollRequest = artPoll.CreateArtPollPacket();
             _data_PollRequestReply = artPollreply.CreateArtPollPacket();
@@ -150,6 +152,7 @@ namespace ArtnetForUnity
                     AddSenderPkt(pkt);
                     //Internal Reply
                     pkt.ipAddress = ArtnetForUnity.ArtUtils.InterfaceIPAddress;
+                    _data_PollRequestReply = artPollreply.CreateArtPollPacket();
                     pkt.pktData = _data_PollRequestReply;
                     pkt.opCode = ArtnetForUnity.OpCodes.OpPollReply;
                     AddSenderPkt(pkt);
@@ -339,6 +342,22 @@ namespace ArtnetForUnity
         public IPAddress ipAddress;
         public bool connected;
         public int offlineTicker;
+
+        public SubscriberTable subscriberTable;
+    }
+
+    public struct SubscriberTable
+    {
+        public SubscriberIndex NodeIndex;
+    }
+    
+    public struct SubscriberIndex
+    {
+        public int PortIndex;
+        public IPAddress IPAddress;
+        public byte NetSwitch;
+        public byte SubSwitch;
+        public byte SwInOut;
     }
 
 

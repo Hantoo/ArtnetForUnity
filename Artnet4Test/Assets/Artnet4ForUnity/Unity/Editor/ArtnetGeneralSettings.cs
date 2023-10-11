@@ -73,10 +73,16 @@ public class ArtnetGeneralSettings : EditorWindow
         {
             var label = e.Q<Label>("Label_Name");
             label.text = artNetNodesList[i].name;
-            var label_ip = e.Q<Label>("Label_IP");
-            label_ip.text = artNetNodesList[i].ipAddress.ToString();
+            Button button_ip = e.Q<Button>("Label_IP");
+            button_ip.text = artNetNodesList[i].ipAddress.ToString();
             var ve_status = e.Q<VisualElement>("VisualEl_ConnectionStatus");
             if (artNetNodesList[i].connected) { ve_status.style.backgroundColor = new StyleColor(StatusConnected); } else { ve_status.style.backgroundColor = new StyleColor(StatusDisconnected); }
+
+            button_ip.RegisterCallback<ClickEvent>(evt =>
+            {
+                System.Diagnostics.Process.Start("http://"+artNetNodesList[i].ipAddress.ToString());
+            });
+
         };
         NodeListView = root.Q<ListView>("NodeList");
         artNetNodesList = ArtnetForUnity.ArtnetManager.deviceList;
@@ -96,7 +102,8 @@ public class ArtnetGeneralSettings : EditorWindow
         });
 
         
-           //Set Ip Address Text
+
+        //Set Ip Address Text
         Label NICIpAddress = root.Q<Label>("Label_IpAddressUsage");
         NICIpAddress.text = "Using " + settings.IPAddress;
 

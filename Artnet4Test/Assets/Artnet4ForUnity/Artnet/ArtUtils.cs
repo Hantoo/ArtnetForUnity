@@ -251,6 +251,11 @@ namespace ArtnetForUnity
             ///return null;
 
         }
+
+        public static bool IsBitSet(byte b, int pos)
+        {
+            return (b & (1 << pos)) != 0;
+        }
     }
 
     public enum OpCodes
