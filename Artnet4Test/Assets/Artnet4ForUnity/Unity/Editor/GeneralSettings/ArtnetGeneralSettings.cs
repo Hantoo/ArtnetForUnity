@@ -27,7 +27,7 @@ public class ArtnetGeneralSettings : EditorWindow
     public static void ShowExample()
     {
         ArtnetGeneralSettings wnd = GetWindow<ArtnetGeneralSettings>();
-        wnd.titleContent = new GUIContent("ArtnetGeneralSettings");
+        wnd.titleContent = new GUIContent("Artnet General Settings");
         wnd.minSize = new Vector2(380, 400);
     }
 
@@ -62,7 +62,7 @@ public class ArtnetGeneralSettings : EditorWindow
         Button RefreshListButton = root.Q<Button>("Button_RefreshList");
         // The "makeItem" function will be called as needed
         // when the ListView needs more items to render
-        var listItem = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Artnet4ForUnity/Unity/Editor/ArtnetDevices.uxml");
+        var listItem = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Artnet4ForUnity/Unity/Editor/GeneralSettings/ArtnetDevices.uxml");
 
         Func<VisualElement> makeItem = () => listItem.Instantiate();
 
