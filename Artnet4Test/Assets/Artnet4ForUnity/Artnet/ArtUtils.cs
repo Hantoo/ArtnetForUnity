@@ -6,6 +6,7 @@ using System.IO;
 using System.Net;
 using System.Net.NetworkInformation;
 using UnityEngine;
+
 namespace ArtnetForUnity
 {
     public static class ArtUtils
@@ -18,7 +19,8 @@ namespace ArtnetForUnity
         public static int ControllerFirmwareNumber = 1;
         public static int OemCode = 0x0001;
         public static int ESTACode = 32767;
-
+        public static NetworkInterface[] NetworkInterfaces;
+        public static NetworkInterface SelectedInterface;
         public static OpCodes GetOpCodeFromByte(byte OpCodeByte)
         {
             OpCodes code = (OpCodes)OpCodeByte;
@@ -140,11 +142,43 @@ namespace ArtnetForUnity
             return loadedSettings;
         }
 
+        public static bool GetInterface(IPAddress ipaddress, out NetworkInterface NIcinterface)
+        {
+            NetworkInterface[] Interfaces = NetworkInterface.GetAllNetworkInterfaces();
+            NetworkInterfaces = Interfaces;
+            IPAddress ip = ipaddress;
+            bool exists = false;
+            NIcinterface = null;
+            foreach (NetworkInterface interf in Interfaces)
+            {
+
+                UnicastIPAddressInformationCollection UnicastIPInfoCol = interf.GetIPProperties().UnicastAddresses;
+
+                foreach (UnicastIPAddressInformation UnicatIPInfo in UnicastIPInfoCol)
+                {
+                    if (UnicatIPInfo.Address.Equals(ip))
+                    {
+                        exists = true;
+                        NIcinterface = interf;
+                    }
+                }
+
+            }
+            if (exists) { return true; }
+            else
+            {
+               
+                return false;
+            }
+        }
+
         public static IPAddress checkNICExists(IPAddress ipaddress)
         {
             NetworkInterface[] Interfaces = NetworkInterface.GetAllNetworkInterfaces();
+            NetworkInterfaces = Interfaces;
             IPAddress ip = ipaddress;
             bool exists = false;
+            
             foreach (NetworkInterface interf in Interfaces)
             {
 
@@ -166,6 +200,18 @@ namespace ArtnetForUnity
             }
         }
 
+        public static bool GetDhcp()
+        {
+            
+            if (SelectedInterface.GetIPProperties().GetIPv4Properties() != null)
+            {
+                return SelectedInterface.GetIPProperties().GetIPv4Properties().IsDhcpEnabled;
+            }
+            else
+            {
+                return false;
+            }
+        }
         public static void SaveSettings(ArtnetSettings settings)
         {
             //ArtnetGeneralSettings wnd = GetWindow<ArtnetGeneralSettings>();
@@ -341,6 +387,8 @@ namespace ArtnetForUnity
         DpCritical = 0xe0,
         DpVolatile = 0xf0
     }
+
+
 
     public struct ArtnetSettings
     {

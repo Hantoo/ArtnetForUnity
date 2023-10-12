@@ -5,6 +5,7 @@ using System.Net;
 using System.Text;
 using UnityEngine;
 
+
 namespace ArtnetForUnity
 {
     public class ArtPollReply
@@ -49,22 +50,23 @@ namespace ArtnetForUnity
         //byte[] pkt_Mac5 = new byte[1];    //Offset 205 
         //byte[] pkt_MacLo = new byte[1];    //Offset 206 -- Anything After this is optional
         byte[] pkt_BindIP = new byte[4];    //Offset 207
+        byte[] pkt_BindIndex = new byte[1];    //Offset 207
         byte[] pkt_Status2 = new byte[1];    //Offset 211 
-        byte[] pkt_GoodOutputB = new byte[4];    //Offset 212 
-        byte[] pkt_Status3 = new byte[1];    //Offset 216
-        byte[] pkt_DefaulRespUIDHi = new byte[1];    //Offset 217 
-        byte[] pkt_DefaulRespUID1 = new byte[1];    //Offset 218 
-        byte[] pkt_DefaulRespUID2 = new byte[1];    //Offset 219 
-        byte[] pkt_DefaulRespUID3 = new byte[1];    //Offset 220 
-        byte[] pkt_DefaulRespUID4 = new byte[1];    //Offset 221 
-        byte[] pkt_DefaulRespUIDLo = new byte[1];    //Offset 222 
-        byte[] pkt_UserHi = new byte[1];    //Offset 223 
-        byte[] pkt_UserLo = new byte[1];    //Offset 224 
-        byte[] pkt_RefreshRateHi = new byte[1];    //Offset 225 
-        byte[] pkt_RefreshRateLo = new byte[1];    //Offset 226 
-        byte[] pkt_Filler = new byte[8];    //Offset 227 
-
-        byte[] pkt_fullReturn = new byte[207];
+        byte[] pkt_GoodOutputB = new byte[4];    //Offset 213 
+        byte[] pkt_Status3 = new byte[1];    //Offset 217
+        byte[] pkt_DefaulRespUIDHi = new byte[1];    //Offset 218 
+        byte[] pkt_DefaulRespUID1 = new byte[1];    //Offset 219 
+        byte[] pkt_DefaulRespUID2 = new byte[1];    //Offset 220 
+        byte[] pkt_DefaulRespUID3 = new byte[1];    //Offset 221 
+        byte[] pkt_DefaulRespUID4 = new byte[1];    //Offset 222 
+        byte[] pkt_DefaulRespUIDLo = new byte[1];    //Offset 223 
+        byte[] pkt_UserHi = new byte[1];    //Offset 224
+        byte[] pkt_UserLo = new byte[1];    //Offset 225 
+        byte[] pkt_RefreshRateHi = new byte[1];    //Offset 226 
+        byte[] pkt_RefreshRateLo = new byte[1];    //Offset 227 
+        byte[] pkt_Filler = new byte[11];    //Offset 228 
+        
+        byte[] pkt_fullReturn = new byte[239];
         private Status1_IndicatorState status1_IndicatorState;
         private Status1_PortAddressProgrammingAuthority status1_PortAddressProgrammingAuthority;
         private Status1_FirmwareBoot status1_FirmwareBoot;
@@ -137,6 +139,22 @@ namespace ArtnetForUnity
             //pkt_spare3
             pkt_Style[0] = (byte)StyleCode.StController;
             pkt_Mac = ArtUtils.InterfaceMacAddress.GetAddressBytes();
+            pkt_BindIP = ArtUtils.InterfaceIPAddress.GetAddressBytes(); //Find better way for root ip identifiction
+            pkt_Status2[0] = (byte)(ParseStatus2Byte(false, false, false, false, true, true, ArtUtils.GetDhcp(), false));
+            pkt_GoodOutputB = new byte[] { 0xC0, 0xC0, 0xC0, 0xC0 }; // 128 = 1 RDM disabled, 0 RDM Enabled, 64 = 1 Output Continious, 0 output delta, rest of bits not used
+            pkt_Status3[0] = (byte)(ParseStatus3Byte(Status3_HoldingState.AllOutputsToZero, false, false, false));
+            pkt_DefaulRespUIDHi[0] = 0x00;
+            pkt_DefaulRespUID1[0] = 0x00;
+            pkt_DefaulRespUID2[0] = 0x00;
+            pkt_DefaulRespUID3[0] = 0x00;
+            pkt_DefaulRespUID4[0] = 0x00;
+            pkt_DefaulRespUIDLo[0] = 0x00;
+            pkt_UserHi[0] = 0x00;
+            pkt_UserLo[0] = 0x00;
+            pkt_UserLo[0] = 0x00;
+            pkt_RefreshRateHi[0] = 0x00;
+            pkt_RefreshRateLo[0] = 0x00;
+            pkt_Filler[0] = 0x00;
             CompilePacket();
             ArtPollReplyCounter = ArtPollReplyCounter + 1;
             return pkt_fullReturn;
@@ -178,7 +196,23 @@ namespace ArtnetForUnity
             Array.Copy(pkt_spare3, 0, pkt_fullReturn, 199, pkt_spare3.Length);
             Array.Copy(pkt_Style, 0, pkt_fullReturn, 200, pkt_Style.Length);
             Array.Copy(pkt_Mac, 0, pkt_fullReturn, 201, pkt_Mac.Length);
-         
+            Array.Copy(pkt_BindIP, 0, pkt_fullReturn, 207, pkt_BindIP.Length);
+            Array.Copy(pkt_BindIndex, 0, pkt_fullReturn, 211, pkt_BindIndex.Length);
+            Array.Copy(pkt_Status2, 0, pkt_fullReturn, 212, pkt_Status2.Length);
+            Array.Copy(pkt_GoodOutputB, 0, pkt_fullReturn, 213, pkt_GoodOutputB.Length);
+            Array.Copy(pkt_Status3, 0, pkt_fullReturn, 217, pkt_Status3.Length);
+            Array.Copy(pkt_DefaulRespUIDHi, 0, pkt_fullReturn, 218, pkt_DefaulRespUIDHi.Length);
+            Array.Copy(pkt_DefaulRespUID1, 0, pkt_fullReturn, 219, pkt_DefaulRespUID1.Length);
+            Array.Copy(pkt_DefaulRespUID2, 0, pkt_fullReturn, 220, pkt_DefaulRespUID2.Length);
+            Array.Copy(pkt_DefaulRespUID3, 0, pkt_fullReturn, 221, pkt_DefaulRespUID3.Length);
+            Array.Copy(pkt_DefaulRespUID4, 0, pkt_fullReturn, 222, pkt_DefaulRespUID4.Length);
+            Array.Copy(pkt_DefaulRespUIDLo, 0, pkt_fullReturn, 223, pkt_DefaulRespUIDLo.Length);
+            Array.Copy(pkt_UserHi, 0, pkt_fullReturn, 224, pkt_UserHi.Length);
+            Array.Copy(pkt_UserLo, 0, pkt_fullReturn, 225, pkt_UserLo.Length);
+            Array.Copy(pkt_RefreshRateHi, 0, pkt_fullReturn, 226, pkt_RefreshRateHi.Length);
+            Array.Copy(pkt_RefreshRateLo, 0, pkt_fullReturn, 227, pkt_RefreshRateLo.Length);
+            Array.Copy(pkt_Filler, 0, pkt_fullReturn, 228, pkt_Filler.Length);
+
         }
 
         public static string GetName(byte[] data)
@@ -472,14 +506,62 @@ namespace ArtnetForUnity
 
 
             //byte Pos 1 = Error Code. byte Pos 7 = Counter 
-        }
+            }
 
             public NodeReport nodeReportFeedback;
             public Int32 ArtPollResponseCounter;
             public string message;
         }
 
-      
+        public int ParseStatus2Byte(bool SupportsRDMViaArtCommand, bool NodeSupportsArtCommandOutputSwitching, bool Squawking, bool AbleToSwitchBetweenArtnetAndScan, bool canUseArtnet3, bool DCHPCapable, bool isIPDCHP, bool configurableViaWebBrowser)
+        {
+            int val = 0;
+            if (configurableViaWebBrowser) val += 1;
+            if (isIPDCHP) val += 2;
+            if (DCHPCapable) val += 4;
+            if (canUseArtnet3) val += 8;
+            if (AbleToSwitchBetweenArtnetAndScan) val += 16;
+            if (Squawking) val += 32;
+            if (NodeSupportsArtCommandOutputSwitching) val += 64;
+            if (SupportsRDMViaArtCommand) val += 128;
+
+            return val;
+        }
+
+        public int ParseStatus3Byte(Status3_HoldingState NoDataState, bool NodeSupportsFailOver, bool NodeSupportsLLRP, bool NodeSupportsSwitchingInputAndOutputs)
+        {
+            int val = 0;
+            switch (NoDataState)
+            {
+                case Status3_HoldingState.HoldLastState:
+                    val += 0;
+                    break;
+                case Status3_HoldingState.AllOutputsToZero:
+                    val += 64;
+                    break;
+                case Status3_HoldingState.AllOutputsToFull:
+                    val += 128;
+                    break;
+                case Status3_HoldingState.PlaybackDailSafeScene:
+                    val += 192;
+                    break;
+            }
+            if (NodeSupportsFailOver) val += 32;
+            if (NodeSupportsLLRP) val += 16;
+            if (NodeSupportsSwitchingInputAndOutputs) val += 8;
+   
+
+            return val;
+        }
+
+        public enum Status3_HoldingState
+        {
+            HoldLastState = 0,
+            AllOutputsToZero = 1,
+            AllOutputsToFull = 2,
+            PlaybackDailSafeScene = 3
+        }
+
         public struct Status1
         {
             public void status1UnPack(byte byteval)

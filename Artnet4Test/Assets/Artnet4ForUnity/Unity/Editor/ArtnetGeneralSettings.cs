@@ -28,6 +28,7 @@ public class ArtnetGeneralSettings : EditorWindow
     {
         ArtnetGeneralSettings wnd = GetWindow<ArtnetGeneralSettings>();
         wnd.titleContent = new GUIContent("ArtnetGeneralSettings");
+        wnd.minSize = new Vector2(380, 400);
     }
 
     private IEnumerator TickTock()

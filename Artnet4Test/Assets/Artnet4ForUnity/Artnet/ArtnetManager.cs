@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Threading;
 using UnityEngine;
@@ -46,6 +47,11 @@ namespace ArtnetForUnity
         private void init()
         {
             ArtnetForUnity.ArtUtils.LoadSettings();
+            NetworkInterface networkInterface;
+            if(ArtnetForUnity.ArtUtils.GetInterface(ArtnetForUnity.ArtUtils.InterfaceIPAddress, out networkInterface))
+            {
+                ArtUtils.SelectedInterface = networkInterface;
+            }
             //Debug.Log("Using: " + ArtnetForUnity.ArtUtils.InterfaceIPAddress.ToString());
 
             udpClient = new UdpClient();
