@@ -7,13 +7,17 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Threading;
+using UnityEditor;
 using UnityEngine;
+using ArtnetForUnity.Timecode;
 
 namespace ArtnetForUnity
 {
+
     public class ArtnetManager : IDisposable
     {
 
+        
         //// Start is called before the first frame update
         //void Start()
         //{
@@ -44,6 +48,8 @@ namespace ArtnetForUnity
         ArtnetForUnity.ArtPoll artPoll;
         ArtnetForUnity.ArtPollReply artPollreply;
 
+        public TimecodeManager timecodeManager;
+
         private void init()
         {
             ArtnetForUnity.ArtUtils.LoadSettings();
@@ -53,7 +59,8 @@ namespace ArtnetForUnity
                 ArtUtils.SelectedInterface = networkInterface;
             }
             //Debug.Log("Using: " + ArtnetForUnity.ArtUtils.InterfaceIPAddress.ToString());
-
+            timecodeManager = new TimecodeManager();
+            timecodeManager.init(); 
             udpClient = new UdpClient();
             udpClient.ExclusiveAddressUse = false;
             udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
@@ -112,24 +119,25 @@ namespace ArtnetForUnity
             UnityEngine.Debug.Log("Main Loop Thread Started");
             while (isArtnetActive)
             {
-              
+
                 if (ArtnetUniverseValues == null)
                 {
-                   
+
                     return;
                 }
-            
+
+                #if UNITY_STANDALONE
                 //Send DMX
                 if (ArtnetUniverseValues != null)
                     try
                     {
-                      
+
                         for (int i = 0; i < ArtnetUniverseValues.Length; i++)
                         {
-                           
+
                             if (ArtnetUniverseValues[i].data == null || ArtnetUniverseValues[i].data.Length == 0) continue;
                             //pkt = new ArtnetForUnity.IPPacket();
-                           
+
                             pkt.opCode = ArtnetForUnity.OpCodes.OpDmx;
                             pkt.pktData = dmxPkt.CreateArtDmxPacket(ArtnetUniverseValues[i].data, ArtnetUniverseValues[i].Universe);
                             for (int _ipIndex = 0; _ipIndex < ArtnetUniverseValues[i].iPAddress.Length; _ipIndex++)
@@ -137,19 +145,22 @@ namespace ArtnetForUnity
                                 ;
                                 pkt.ipAddress = ArtnetUniverseValues[i].iPAddress[_ipIndex];
                                 AddSenderPkt(pkt);
-                              
+
                             }
-                          
+
 
 
                         }
-                    }catch(Exception e)
+                    }
+                    catch (Exception e)
                     {
                         UnityEngine.Debug.LogError(e);
                     }
-             
-                //ArtPoll
-                if (ArtnetPollTimer.Elapsed.TotalMilliseconds > 2800)
+            
+                #endif
+
+            //ArtPoll
+            if (ArtnetPollTimer.Elapsed.TotalMilliseconds > 2800)
                 { //2.8Seconds
                     //Poll
                     pkt.ipAddress = ArtnetForUnity.ArtUtils.broadcastAddress;
@@ -200,7 +211,17 @@ namespace ArtnetForUnity
                 device.name = ArtPollReply.GetName(pkt.pktData);
                 CheckArtPortWithDeviceList(device);
             }
-        
+
+            if (pkt.opCode == OpCodes.OpTimeCode)
+            {
+
+                ArtnetDevice device;
+                getDeviceFromIP(pkt.ipAddress, out device);
+                timecodeManager.UpdateCurrentTimecode(timecodeManager.ParseTimecodePacket(pkt, device));
+
+
+
+            }
         }
 
         public void AddSenderPkt(IPPacket pkt)
@@ -296,6 +317,20 @@ namespace ArtnetForUnity
             }
         }
 
+        private bool getDeviceFromIP(IPAddress address, out ArtnetDevice device)
+        {
+            device = new ArtnetDevice();
+            for (int i = 0; i < deviceList.Count; i++)
+            {
+                if(deviceList[i].ipAddress.ToString() == address.ToString())
+                {
+                    device = deviceList[i];
+                    return true;
+                }
+            }
+            return false;
+        }
+
         List<int> removeDevicesAtIndex = new List<int>();
         private void RefreshDeviceList()
         {
@@ -366,5 +401,40 @@ namespace ArtnetForUnity
         public byte SwInOut;
     }
 
+
+
+    #if UNITY_EDITOR
+    [InitializeOnLoad]
+    public class ArtnetManagerEditor
+    {
+
+        static ArtnetForUnity.ArtnetManager artnetManager;
+        static ArtnetManagerEditor()
+        {
+            UnityEngine.Debug.Log("Artnet Manager Started In Editor");
+            //client = new UdpClient();
+            artnetManager = new ArtnetForUnity.ArtnetManager();
+            artnetManager.Start(1);
+
+            EditorApplication.quitting += Quit;
+        }
+
+        public static void Quit()
+        {
+         
+            artnetManager.Stop();
+            artnetManager.Dispose();
+            UnityEngine.Debug.Log("Artnet Manager Stopped In Editor");
+        }
+
+        ~ArtnetManagerEditor()
+        {
+            artnetManager.Stop();
+            artnetManager.Dispose();
+            UnityEngine.Debug.Log("Artnet Manager Stopped In Editor");
+        }
+
+    }
+    #endif
 
 }
