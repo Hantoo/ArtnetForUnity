@@ -8,7 +8,7 @@ using System.Collections;
 using ArtnetForUnity.Timecode;
 using UnityEditor.UIElements;
 
-namespace ArtnetForUnity
+namespace ArtnetForUnity.Timecode
 {
 
     public class TimecodeWindow : EditorWindow
@@ -22,10 +22,12 @@ namespace ArtnetForUnity
         Label labelHoursText;
         Label labelSecondsText;
         Label labelMinutesText;
+        Label labelTCTypeText;
         private int tCFrames;
         private int tCHour;
         private int tcSeconds;
         private int tCMinutes;
+        private string tCType;
 
         [MenuItem("Artnet/TimecodeViewer")]
         public static void ShowExample()
@@ -76,6 +78,7 @@ namespace ArtnetForUnity
             labelHoursText = root.Q<Label>("TC_Hour");
             labelSecondsText = root.Q<Label>("TC_Sec");
             labelMinutesText = root.Q<Label>("TC_Min");
+            labelTCTypeText = root.Q<Label>("TC_FrameRateType");
 
 
         }
@@ -86,6 +89,7 @@ namespace ArtnetForUnity
             labelHoursText.text = tCHour.ToString("00");
             labelSecondsText.text = tcSeconds.ToString("00");
             labelMinutesText.text = tCMinutes.ToString("00");
+            labelTCTypeText.text = tCType;
         }
 
         public void TimecodeEvent(ArtTimecode e)
@@ -95,6 +99,23 @@ namespace ArtnetForUnity
             tCHour = e.hours;
             tcSeconds = e.seconds;
             tCMinutes = e.mintues;
+
+            switch (e.timecodeFPS)
+            {
+                case TimecodeType.Film_24FPS:
+                    tCType = "24 FPS (Film)";
+                    break;
+                case TimecodeType.DF_29_97FPS:
+                    tCType = "29.97 FPS (DF)";
+                    break;
+                case TimecodeType.EBU_25FPS:
+                    tCType = "25 FPS (EBU)";
+                    break;
+                case TimecodeType.SMPTE_30FPS:
+                    tCType = "30 FPS (SMPTE)";
+                    break;
+            }
+            
         }
          
         public void OnDestroy()
