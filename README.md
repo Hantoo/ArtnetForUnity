@@ -82,7 +82,7 @@ To recieve TimeCode, you can either check what the public static ```CurrentTimec
 Image above shows the UI panel, found under Artnet > General Settings. From here you can choose the NIC that Art-Net uses as well as the Art-Net complient nodes found on the network.
 The nodes status update every 4 seconds. 
     
-<img width="569" alt="image" src="https://github.com/Hantoo/ArtnetForUnity/assets/1647342/4021352e-ee8c-480f-ae7a-c29c1acd2616">
+<img width="569" alt="image" src="https://github.com/Hantoo/ArtnetForUnity/assets/1647342/4021352e-ee8c-480f-ae7a-c29c1acd2616">    
 Image above shows the UI panel, found under Artnet > TimecodeViewer. You can see the incoming timecode and the framerate that the timecode has been set too.
 
 ## External Packages Used
