@@ -202,7 +202,7 @@ namespace ArtnetForUnity
 
         public static bool GetDhcp()
         {
-            
+            if (SelectedInterface == null) return false;
             if (SelectedInterface.GetIPProperties().GetIPv4Properties() != null)
             {
                 return SelectedInterface.GetIPProperties().GetIPv4Properties().IsDhcpEnabled;
@@ -394,7 +394,7 @@ namespace ArtnetForUnity
     {
         public string IPAddress;
         public string InterfaceName;
-
+        public bool useArtSync;
     }
 
 }

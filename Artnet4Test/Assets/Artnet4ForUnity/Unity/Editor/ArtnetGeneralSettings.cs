@@ -19,8 +19,12 @@ public class ArtnetGeneralSettings : EditorWindow
     private float lastRefreshTime;
     private EditorCoroutine refreshNodeRoutine;
     private ListView NodeListView;
+    private bool unsavedChanges;
     [SerializeField]
     VisualTreeAsset m_ItemAsset;
+
+
+    StyleColor SaveButtonStandardColour;
 
     public List<ArtnetForUnity.ArtnetDevice> artNetNodesList = new List<ArtnetForUnity.ArtnetDevice>();
     [MenuItem("Artnet/ArtnetGeneralSettings")]
@@ -58,7 +62,18 @@ public class ArtnetGeneralSettings : EditorWindow
         saveButton.RegisterCallback<ClickEvent>(evt =>
         {
             ArtnetGeneralSettings_Functions.SaveSettings(settings);
-        }); 
+            unSavedChanges(false);
+        });
+        SaveButtonStandardColour = saveButton.style.backgroundColor;
+
+        Toggle toggleArtSync = root.Q<Toggle>("ToggleArtSync");
+        toggleArtSync.value = settings.useArtSync;
+        toggleArtSync.RegisterCallback<ClickEvent>(evt =>
+        {
+            settings.useArtSync = toggleArtSync.value;
+            unSavedChanges(true);
+        });
+
         Button RefreshListButton = root.Q<Button>("Button_RefreshList");
         // The "makeItem" function will be called as needed
         // when the ListView needs more items to render
@@ -138,6 +153,20 @@ public class ArtnetGeneralSettings : EditorWindow
         settings.IPAddress = nics[NICRadioGroup.value].IPString;
         settings.InterfaceName = nics[NICRadioGroup.value].Name;
         NICIpAddress.text = "Using "+ settings.IPAddress;
-        
+        unSavedChanges(true);
+    }
+
+    private void unSavedChanges(bool AreUnsavedChanges)
+    {
+        Button saveBtn = root.Q<Button>("Button_SaveGeneralSettings");
+        if (AreUnsavedChanges)
+        {
+            StyleColor col = new StyleColor(new Color(1.0f,0.57f,0f));
+            saveBtn.style.backgroundColor = col;
+        }
+        else
+        {
+            saveBtn.style.backgroundColor = SaveButtonStandardColour;
+        }
     }
 }
