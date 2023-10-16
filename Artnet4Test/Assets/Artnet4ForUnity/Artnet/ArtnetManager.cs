@@ -71,6 +71,7 @@ namespace ArtnetForUnity
             ArtSync artSync = new ArtSync();
             pkt_ArtSync.pktData = artSync.CombinePacket();
             pkt_ArtSync.opCode = OpCodes.OpSync;
+            pkt_ArtSync.ipAddress = ArtUtils.broadcastAddress;
         }
 
         public byte[] _data_PollRequest;
@@ -152,18 +153,7 @@ namespace ArtnetForUnity
                         }
                         if (settings.useArtSync)
                         {
-                            for (int i = 0; i < ArtnetUniverseValues.Length; i++)
-                            {
-                                if (ArtnetUniverseValues[i].data == null || ArtnetUniverseValues[i].data.Length == 0) continue;
-                                for (int _ipIndex = 0; _ipIndex < ArtnetUniverseValues[i].iPAddress.Length; _ipIndex++)
-                                {
-                                    
-                                    pkt_ArtSync.ipAddress = ArtnetUniverseValues[i].iPAddress[_ipIndex];
-                                    AddSenderPkt(pkt_ArtSync);
-
-                                }
-                            }
-                            
+                            AddSenderPkt(pkt_ArtSync);
                         }
                     }catch(Exception e)
                     {
