@@ -23,11 +23,21 @@ namespace ArtnetForUnity.Timecode
         Label labelSecondsText;
         Label labelMinutesText;
         Label labelTCTypeText;
+        Label labelTCMode;
+        VisualElement veTCMode;
         private int tCFrames;
         private int tCHour;
         private int tcSeconds;
         private int tCMinutes;
         private string tCType;
+        private string tcMode;
+
+        private Color RevcTextColor = new Color(1f, 0.41f, 0f, 1f);
+        private Color RevcBgColor = new Color(0.78f, 0f, 0f, 1f);
+        private Color SendTextColor = new Color(0f, 1f, 0.11f, 1f);
+        private Color SendBgColor = new Color(0f, 0.5f, 0.01f, 1f);
+        private Color TextColor = new Color(1f, 1f, 1f, 1f);
+        private Color BgColor = new Color(0.15f, 0.15f, 0.15f, 1f);
 
         [MenuItem("Artnet/TimecodeViewer")]
         public static void ShowExample()
@@ -53,12 +63,12 @@ namespace ArtnetForUnity.Timecode
             Button PlayButton = root.Q<Button>("TC_PlayButton");
             PlayButton.RegisterCallback<ClickEvent>(evt =>
             {
-                
+                TimecodeManager.playTimecode?.Invoke();
             });
             Button PauseButton = root.Q<Button>("TC_PauseButton");
             PauseButton.RegisterCallback<ClickEvent>(evt =>
             {
-
+                TimecodeManager.pauseTimecode?.Invoke();
             });
 
             Button StopButton = root.Q<Button>("TC_StopButton");
@@ -70,7 +80,7 @@ namespace ArtnetForUnity.Timecode
             Button BackButton = root.Q<Button>("TC_BackButton");
             BackButton.RegisterCallback<ClickEvent>(evt =>
             {
-
+                TimecodeManager.resetTimecode?.Invoke();
             });
    
             TimecodeManager.TimecodeUpdate += TimecodeEvent;
@@ -79,6 +89,9 @@ namespace ArtnetForUnity.Timecode
             labelSecondsText = root.Q<Label>("TC_Sec");
             labelMinutesText = root.Q<Label>("TC_Min");
             labelTCTypeText = root.Q<Label>("TC_FrameRateType");
+            labelTCMode = root.Q<Label>("TC_Mode");
+            veTCMode = root.Q<VisualElement>("TCModeBackground");
+            tcMode = "No TimeCode Detected";
 
 
         }
@@ -90,16 +103,21 @@ namespace ArtnetForUnity.Timecode
             labelSecondsText.text = tcSeconds.ToString("00");
             labelMinutesText.text = tCMinutes.ToString("00");
             labelTCTypeText.text = tCType;
+            labelTCMode.text = tcMode;
+            veTCMode.style.backgroundColor = BgColor;
+            labelFrameText.style.color = TextColor;
+            labelHoursText.style.color = TextColor;
+            labelSecondsText.style.color = TextColor;
+            labelMinutesText.style.color = TextColor;
         }
 
         public void TimecodeEvent(ArtTimecode e)
         {
-           
             tCFrames = e.frames;
             tCHour = e.hours;
             tcSeconds = e.seconds;
             tCMinutes = e.mintues;
-
+            
             switch (e.timecodeFPS)
             {
                 case TimecodeType.Film_24FPS:
@@ -115,7 +133,25 @@ namespace ArtnetForUnity.Timecode
                     tCType = "30 FPS (SMPTE)";
                     break;
             }
+ 
+
+            //UnityEngine.Debug.Log("e.mode:" + e.mode.ToString());
+            switch (e.mode)
+            {
+                case TimecodeMode.Sender:
+                    TextColor = SendTextColor;
+                    BgColor = SendBgColor;
+                    tcMode = "Sending";
+                    break;
+                case TimecodeMode.Receiver:
+                    TextColor = RevcTextColor;
+                    BgColor = RevcBgColor;
+                    tcMode = "Recieving";
+                    break;
+            }
+        
             
+
         }
          
         public void OnDestroy()

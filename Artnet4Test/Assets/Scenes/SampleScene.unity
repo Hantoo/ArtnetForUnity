@@ -339,6 +339,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 1
+  RedMaster: 0.2
+  GreenMaster: 0
+  BlueMaster: 0
+  timer: 4
 --- !u!4 &1250529070
 Transform:
   m_ObjectHideFlags: 0

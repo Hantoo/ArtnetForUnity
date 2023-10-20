@@ -8,6 +8,9 @@
             </ui:Label>
         </ui:VisualElement>
     </ui:VisualElement>
+    <ui:VisualElement name="TCModeBackground" style="flex-grow: 1; background-color: rgb(255, 0, 0); min-height: 20px; height: 20px;">
+        <ui:Label tabindex="-1" text="Mode #########" display-tooltip-when-elided="true" name="TC_Mode" style="align-self: center; -unity-text-align: middle-center; color: rgb(255, 255, 255); -unity-font-style: bold; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; font-size: 15px; justify-content: center;" />
+    </ui:VisualElement>
     <ui:VisualElement name="ReadOut" style="flex-grow: 0; background-color: rgb(22, 22, 22); height: 160px; flex-direction: row; justify-content: center; flex-shrink: 1;">
         <ui:Label tabindex="-1" text="00" display-tooltip-when-elided="true" name="TC_Hour" style="width: 14.2%; font-size: 76px; -unity-font-style: bold; -unity-text-align: middle-center; color: rgb(255, 255, 255);" />
         <ui:Label tabindex="-1" text=":" display-tooltip-when-elided="true" style="width: 7%; font-size: 92px; -unity-text-align: middle-center; color: rgb(53, 53, 53); padding-top: 0; margin-top: -21px;" />

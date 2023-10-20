@@ -50,6 +50,7 @@ namespace ArtnetForUnity
 
         public TimecodeManager timecodeManager;
 
+      
         private void init()
         {
             ArtnetForUnity.ArtUtils.LoadSettings();
@@ -60,7 +61,7 @@ namespace ArtnetForUnity
             }
             //Debug.Log("Using: " + ArtnetForUnity.ArtUtils.InterfaceIPAddress.ToString());
             timecodeManager = new TimecodeManager();
-            timecodeManager.init(); 
+            timecodeManager.init(this); 
             udpClient = new UdpClient();
             udpClient.ExclusiveAddressUse = false;
             udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
@@ -118,13 +119,18 @@ namespace ArtnetForUnity
             timer.Start();
             UnityEngine.Debug.Log("Main Loop Thread Started");
             while (isArtnetActive)
-            {
+            { 
+
 
                 if (ArtnetUniverseValues == null)
                 {
 
                     return;
                 }
+                //Timecode
+                
+                timecodeManager.Update();
+                
 
                 #if UNITY_STANDALONE
                 //Send DMX
@@ -214,13 +220,13 @@ namespace ArtnetForUnity
 
             if (pkt.opCode == OpCodes.OpTimeCode)
             {
-
                 ArtnetDevice device;
                 getDeviceFromIP(pkt.ipAddress, out device);
-                timecodeManager.UpdateCurrentTimecode(timecodeManager.ParseTimecodePacket(pkt, device));
-
-
-
+                //UnityEngine.Debug.Log("pkt.ipAddress:" + pkt.ipAddress.ToString());
+                //UnityEngine.Debug.Log("device.ipAddress:" + device.ipAddress.ToString());
+                //UnityEngine.Debug.Log(", ArtUtils.InterfaceIPAddress:" + ArtUtils.InterfaceIPAddress.ToString());
+                if (pkt.ipAddress.ToString() == ArtUtils.InterfaceIPAddress.ToString()) return;
+                timecodeManager.UpdateCurrentTimecodeFromPacket(timecodeManager.ParseTimecodePacket(pkt, device));
             }
         }
 
@@ -229,7 +235,6 @@ namespace ArtnetForUnity
             if(pkt.opCode == OpCodes.OpPoll) { RefreshDeviceList(); }
             if (SendQueue != null)
                 SendQueue.Add(pkt);
-            //Debug.Log("deviceList Count:" + deviceList.Count);
         }
 
         private void SenderThread()
@@ -283,6 +288,7 @@ namespace ArtnetForUnity
             SendQueue.Dispose();
             ListenQueue.CompleteAdding();
             ListenQueue.Dispose();
+            timecodeManager.Dispose();
         }
 
 
@@ -423,7 +429,9 @@ namespace ArtnetForUnity
         {
          
             artnetManager.Stop();
+            
             artnetManager.Dispose();
+
             UnityEngine.Debug.Log("Artnet Manager Stopped In Editor");
         }
 
