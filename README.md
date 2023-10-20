@@ -61,7 +61,7 @@ ArtTimecode is implemented and allows for you to recieve or send ArtTimecode.
 All timecode interfaces use the timecode namespace, so if you want to interface with it in your project, then ensure you add ``` using ArtnetForUnity.Timecode ```.
 #### Receiving 
 If Unity dectects an ArtTimecode packet, it will latch onto that. There should only ever be one Timecode Source providing timecode on the network at once, or multiple Art-Net timecodes should be unicast.
-To recieve TimeCode, you can either check what the public static ```CurrentTimecode``` variable, within TimecodeManager, is set to every frame - or you can subscribe to the ```TimecodeUpdate``` event by using a method such as the following: 
+To recieve TimeCode, you should check the public static ```CurrentTimecode``` variable, within TimecodeManager, is set to every frame - or you can subscribe to the ```TimecodeUpdate``` event by using a method such as the following: 
 ```
        TimecodeManager.TimecodeUpdate += TimecodeEvent;
        
@@ -75,6 +75,10 @@ To recieve TimeCode, you can either check what the public static ```CurrentTimec
         }
 ```
 
+#### Sending
+To send ArtTimecode you should set the timecode to be sent via the ```.SetTimeCode(hour, minute, second, frame);``` found in the timecodeManager. 
+Once set, you play the Timecode by invoking the ``` TimecodeManager.playTimecode?.Invoke();```, pause the Timecode by invoking ```TimecodeManager.pauseTimecode?.Invoke();``` or reset the timecode back to the most recent SetTimecodev value by invoking ```TimecodeManager.resetTimecode?.Invoke();```.
+
 ## Screenshots
 <img width="499" alt="Screenshot 2023-09-12 103735" src="https://github.com/Hantoo/ArtnetForUnity/assets/1647342/6c70a732-a2ae-4b1c-8c5b-6a4c783f220b">
 
@@ -82,11 +86,14 @@ To recieve TimeCode, you can either check what the public static ```CurrentTimec
 Image above shows the UI panel, found under Artnet > General Settings. From here you can choose the NIC that Art-Net uses as well as the Art-Net complient nodes found on the network.
 The nodes status update every 4 seconds. 
     
-<img width="569" alt="image" src="https://github.com/Hantoo/ArtnetForUnity/assets/1647342/4021352e-ee8c-480f-ae7a-c29c1acd2616">   
 
+<img width="558" alt="Receiving Timecode" src="https://github.com/Hantoo/ArtnetForUnity/assets/1647342/ac560665-c629-4d05-acb7-7d25d842a4c5">    
+     
+<img width="558" alt="Sending Timecode" src="https://github.com/Hantoo/ArtnetForUnity/assets/1647342/e0f1f9c3-fd79-427b-ade6-66ce9bf83eba">
 
 
 Image above shows the UI panel, found under Artnet > TimecodeViewer. You can see the incoming timecode and the framerate that the timecode has been set too.
+If the nubers are red then you are receiving timecode from another device. If the numbers are green then you are sending timecode onto the network.
 
 ## External Packages Used
 * Newtonsoft Json (com.unity.nuget.newtonsoft-json)
