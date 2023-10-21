@@ -78,6 +78,7 @@ To recieve TimeCode, you should check the public static ```CurrentTimecode``` va
 #### Sending
 To send ArtTimecode you should set the timecode to be sent via the ```.SetTimeCode(hour, minute, second, frame);``` found in the timecodeManager. 
 Once set, you play the Timecode by invoking the ``` TimecodeManager.playTimecode?.Invoke();```, pause the Timecode by invoking ```TimecodeManager.pauseTimecode?.Invoke();``` or reset the timecode back to the most recent SetTimecodev value by invoking ```TimecodeManager.resetTimecode?.Invoke();```.
+If you're sending timecode from Unity, To stop the timecode receiver from reading the timecode packets sent - any timecode packets received from the same IP address as the selected Art-Net Interface for Unity will be ignored.
 
 ## Screenshots
 <img width="499" alt="Screenshot 2023-09-12 103735" src="https://github.com/Hantoo/ArtnetForUnity/assets/1647342/6c70a732-a2ae-4b1c-8c5b-6a4c783f220b">
