@@ -150,6 +150,8 @@ namespace ArtnetForUnity.Timecode
             TimecodeSystemTime.Stop();
 
             systemTimeMiliseconds += TimecodeSystemTime.ElapsedMilliseconds;
+            TimecodeSystemTime.Restart();
+
             SenderTimecode.frames = (int)(SenderFramesPerSecond * (float)(systemTimeMiliseconds / 1000));
             if (systemTimeMiliseconds >= 1000)
             {
@@ -173,7 +175,7 @@ namespace ArtnetForUnity.Timecode
             }
             SenderTimecode.mode = TimecodeMode.Sender;
             UpdateTimecodeUI(SenderTimecode);
-            TimecodeSystemTime.Restart();
+            
         }
 
         public void SetTimeCode(int hour, int minute, int second, int frame)
