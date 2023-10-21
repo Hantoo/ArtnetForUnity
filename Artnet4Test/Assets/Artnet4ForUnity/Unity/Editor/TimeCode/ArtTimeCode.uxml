@@ -1,0 +1,31 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Artnet4ForUnity/Unity/Editor/TimeCode/ArtTimeCode.uss?fileID=7433441132597879392&amp;guid=80cd14d3692b59c47aefcda4ae015c7e&amp;type=3#ArtTimeCode" />
+    <ui:VisualElement style="flex-grow: 0; background-color: rgb(46, 46, 46); height: 40px; flex-shrink: 0;">
+        <ui:Label tabindex="-1" text="ART-NET TIMECODE " display-tooltip-when-elided="true" style="color: rgb(255, 255, 255); -unity-font-style: bold; margin-left: 7px; width: 41%; height: 100%; -unity-text-align: middle-left; font-size: 19%;" />
+        <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); width: 150px; align-items: flex-end; transform-origin: right; right: 0; position: absolute;">
+            <ui:Label tabindex="-1" text="FrameRate" display-tooltip-when-elided="true" style="right: 18px; -unity-font-style: bold; color: rgb(255, 255, 255); top: 0; position: absolute; width: 94px; align-items: center; -unity-text-align: upper-center; margin-left: 0; margin-right: 0; margin-top: 2px; margin-bottom: 0; height: 20px; justify-content: center;">
+                <ui:Label tabindex="-1" text="[########]" display-tooltip-when-elided="true" name="TC_FrameRateType" style="position: absolute; color: rgb(255, 255, 255); transform-origin: bottom; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; bottom: -15px; justify-content: center; align-items: center;" />
+            </ui:Label>
+        </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:VisualElement name="TCModeBackground" style="flex-grow: 1; background-color: rgb(255, 0, 0); min-height: 20px; height: 20px;">
+        <ui:Label tabindex="-1" text="Mode #########" display-tooltip-when-elided="true" name="TC_Mode" style="align-self: center; -unity-text-align: middle-center; color: rgb(255, 255, 255); -unity-font-style: bold; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; font-size: 15px; justify-content: center;" />
+    </ui:VisualElement>
+    <ui:VisualElement name="ReadOut" style="flex-grow: 0; background-color: rgb(22, 22, 22); height: 160px; flex-direction: row; justify-content: center; flex-shrink: 1;">
+        <ui:Label tabindex="-1" text="00" display-tooltip-when-elided="true" name="TC_Hour" style="width: 14.2%; font-size: 76px; -unity-font-style: bold; -unity-text-align: middle-center; color: rgb(255, 255, 255);" />
+        <ui:Label tabindex="-1" text=":" display-tooltip-when-elided="true" style="width: 7%; font-size: 92px; -unity-text-align: middle-center; color: rgb(53, 53, 53); padding-top: 0; margin-top: -21px;" />
+        <ui:Label tabindex="-1" text="00" display-tooltip-when-elided="true" name="TC_Min" style="width: 14.2%; font-size: 76px; -unity-font-style: bold; color: rgb(255, 255, 255); -unity-text-align: middle-left;" />
+        <ui:Label tabindex="-1" text=":" display-tooltip-when-elided="true" style="width: 7%; font-size: 92px; -unity-text-align: middle-center; color: rgb(53, 53, 53); margin-top: -21px; padding-top: 0;" />
+        <ui:Label tabindex="-1" text="00" display-tooltip-when-elided="true" name="TC_Sec" style="width: 14.2%; font-size: 76px; color: rgb(255, 255, 255); -unity-font-style: bold; -unity-text-align: middle-left;" />
+        <ui:Label tabindex="-1" text=":" display-tooltip-when-elided="true" style="width: 7%; -unity-text-align: middle-center; font-size: 92px; color: rgb(53, 53, 53); margin-top: -21px; padding-top: 0;" />
+        <ui:Label tabindex="-1" text="00" display-tooltip-when-elided="true" name="TC_Frame" style="width: 14.2%; font-size: 76px; -unity-font-style: bold; -unity-text-align: middle-left; color: rgb(255, 255, 255);" />
+    </ui:VisualElement>
+    <ui:VisualElement name="Playback" style="flex-grow: 1; background-color: rgb(46, 46, 46);">
+        <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); white-space: nowrap; flex-direction: row; justify-content: center; align-items: stretch;">
+            <ui:Button text="" display-tooltip-when-elided="true" name="TC_PlayButton" style="width: 40px; height: 40px; -unity-font: url(&apos;project://database/Assets/Artnet4ForUnity/Unity/Editor/Fonts/FA6Pro_Reg.otf?fileID=12800000&amp;guid=673896b6931225f46a3c753c0c43fd5c&amp;type=3#FA6Pro_Reg&apos;); -unity-font-definition: initial; color: rgb(149, 149, 149); background-color: rgb(43, 43, 43);" />
+            <ui:Button text="" display-tooltip-when-elided="true" name="TC_PauseButton" enable-rich-text="true" style="width: 40px; height: 40px; -unity-font: url(&apos;project://database/Assets/Artnet4ForUnity/Unity/Editor/Fonts/FA6Pro_Reg.otf?fileID=12800000&amp;guid=673896b6931225f46a3c753c0c43fd5c&amp;type=3#FA6Pro_Reg&apos;); -unity-font-definition: initial; background-color: rgb(43, 43, 43); color: rgb(149, 149, 149);" />
+            <ui:Button text="" display-tooltip-when-elided="true" name="TC_StopButton" style="width: 40px; height: 40px; -unity-font: url(&apos;project://database/Assets/Artnet4ForUnity/Unity/Editor/Fonts/FA6Pro_Reg.otf?fileID=12800000&amp;guid=673896b6931225f46a3c753c0c43fd5c&amp;type=3#FA6Pro_Reg&apos;); -unity-font-definition: initial; color: rgb(149, 149, 149); background-color: rgb(43, 43, 43);" />
+            <ui:Button text="" display-tooltip-when-elided="true" name="TC_BackButton" style="width: 40px; height: 40px; -unity-font: url(&apos;project://database/Assets/Artnet4ForUnity/Unity/Editor/Fonts/FA6Pro_Reg.otf?fileID=12800000&amp;guid=673896b6931225f46a3c753c0c43fd5c&amp;type=3#FA6Pro_Reg&apos;); -unity-font-definition: initial; color: rgb(149, 149, 149); background-color: rgb(43, 43, 43);" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
