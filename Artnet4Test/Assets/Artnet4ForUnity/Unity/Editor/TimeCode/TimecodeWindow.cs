@@ -7,6 +7,7 @@ using Unity.EditorCoroutines.Editor;
 using System.Collections;
 using ArtnetForUnity.Timecode;
 using UnityEditor.UIElements;
+using System.Reflection;
 
 namespace ArtnetForUnity.Timecode
 {
@@ -46,7 +47,12 @@ namespace ArtnetForUnity.Timecode
             wnd.titleContent = new GUIContent("TimecodeWindow");
             wnd.minSize = new Vector2(740, 240);
             wnd.maxSize = new Vector2(740, 240);
+       
         }
+
+    
+
+        
 
         public void CreateGUI()
         {

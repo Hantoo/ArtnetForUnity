@@ -10,6 +10,7 @@ using System.Threading;
 using UnityEditor;
 using UnityEngine;
 using ArtnetForUnity.Timecode;
+using ArtnetForUnity.RDM;
 
 namespace ArtnetForUnity
 {
@@ -51,6 +52,7 @@ namespace ArtnetForUnity
         ArtnetSettings settings;
         ArtnetForUnity.IPPacket pkt_ArtSync = new IPPacket();
         public TimecodeManager timecodeManager;
+        public RdmManager rdmManager;
 
         private void init()
         {
@@ -60,9 +62,14 @@ namespace ArtnetForUnity
             {
                 ArtUtils.SelectedInterface = networkInterface;
             }
-            //Debug.Log("Using: " + ArtnetForUnity.ArtUtils.InterfaceIPAddress.ToString());
+            
+            //Add Ons
             timecodeManager = new TimecodeManager();
-            timecodeManager.init(this); 
+            timecodeManager.init(this);
+
+            rdmManager = new RdmManager();
+            rdmManager.init(this); 
+
             udpClient = new UdpClient();
             udpClient.ExclusiveAddressUse = false;
             udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
@@ -301,6 +308,7 @@ namespace ArtnetForUnity
             ListenQueue.CompleteAdding();
             ListenQueue.Dispose();
             timecodeManager.Dispose();
+            rdmManager.Dispose();
         }
 
 
@@ -441,10 +449,9 @@ namespace ArtnetForUnity
         {
          
             artnetManager.Stop();
-            
             artnetManager.Dispose();
-
             UnityEngine.Debug.Log("Artnet Manager Stopped In Editor");
+
         }
 
         ~ArtnetManagerEditor()

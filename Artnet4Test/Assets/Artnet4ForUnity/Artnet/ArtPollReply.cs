@@ -104,7 +104,7 @@ namespace ArtnetForUnity
             pkt_Status1[0] = (byte)((int)status1_IndicatorState + (int)status1_PortAddressProgrammingAuthority + (int)status1_FirmwareBoot + (int)status1_RDM + (int)status1_UBEA);
             pkt_EstaManLo[0] = ArtUtils.GetLowHighFromInt(ArtUtils.ESTACode)[0];
             pkt_EstaManhi[0] = ArtUtils.GetLowHighFromInt(ArtUtils.ESTACode)[1];
-            pkt_PortName = new byte[] { 0x55, 0x6e, 0x69, 0x74, 0x79, 0x41, 0x72, 0x74, 0x6e, 0x65, 0x74,0x4e,0x6f,0x64,0x65,0x30,0x31};
+            pkt_PortName = Encoding.ASCII.GetBytes(ArtUtils.Truncate(System.Environment.MachineName,18));
             //pkt_LongName
             Array.Copy(pkt_PortName, 0, pkt_LongName, 0, pkt_PortName.Length);
             //pkt_NodeReport

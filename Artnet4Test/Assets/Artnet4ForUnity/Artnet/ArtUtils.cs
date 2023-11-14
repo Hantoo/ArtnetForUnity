@@ -302,6 +302,22 @@ namespace ArtnetForUnity
         {
             return (b & (1 << pos)) != 0;
         }
+
+        public static byte[] GetPortAddress_HiLo(int Net, int SubNet, int Universe)
+        {
+            byte[] PortAddress = new byte[2];
+            PortAddress[0] = (byte)Net;
+            PortAddress[1] = (byte)(((byte)SubNet << 4) + Universe);
+
+            return PortAddress;
+        }
+
+        public static string? Truncate(this string? value, int maxLength, string truncationSuffix = "…")
+        {
+            return value?.Length > maxLength
+                ? value.Substring(0, maxLength) + truncationSuffix
+                : value;
+        }
     }
 
     public enum OpCodes
