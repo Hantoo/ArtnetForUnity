@@ -8,10 +8,13 @@ namespace ArtnetForUnity.RDM
     public class RdmManager : MonoBehaviour
     {
         private ArtnetManager ArtManager;
+        private ArtTODRequest ArtTODRequest;
         public void init(ArtnetManager manager)
         {
             ArtManager = manager;
             refreshRDM += refreshRDMCommand;
+            ArtTODRequest = new ArtTODRequest();
+            TODRequest();
         }
 
         public void Dispose()
@@ -19,8 +22,9 @@ namespace ArtnetForUnity.RDM
             refreshRDM -= refreshRDMCommand;
         }
 
-        public void Update()
+        public void TODRequest()
         {
+            //ArtTODRequest.CreateArtTODRequestPacket();
         }
 
         public void refreshRDMCommand()

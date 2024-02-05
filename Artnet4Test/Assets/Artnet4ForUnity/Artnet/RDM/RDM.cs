@@ -2,19 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RDM : MonoBehaviour
-{
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+public class RDM { 
+ 
 
     public byte RdmStartCode = 0xCC; //SC_RDM
     public byte RdmSubStartCode = 0x01; //SC_Sub_Message
@@ -263,5 +252,195 @@ public class RDM : MonoBehaviour
         PRODUCT_DETAIL_OTHER = 0x7FFF,
   
     }
+
+    public enum PresetPlayback
+    {
+        PRESET_PLAYBACK_OFF = 0X0000,
+        PRESET_PLAYBACK_ALL = 0XFFFF,
+        PRESET_PLAYBACK_SCENE_01 = 0X0001, //0X0001 - 0XFFFE
+        PRESET_PLAYBACK_SCENE_02 = 0X0002,
+        PRESET_PLAYBACK_SCENE_03 = 0X0003,
+        PRESET_PLAYBACK_SCENE_04 = 0X0004,
+        PRESET_PLAYBACK_SCENE_05 = 0X0005,
+        PRESET_PLAYBACK_SCENE_06 = 0X0006,
+        PRESET_PLAYBACK_SCENE_07 = 0X0007,
+        PRESET_PLAYBACK_SCENE_08 = 0X0008,
+        PRESET_PLAYBACK_SCENE_09 = 0X0009,
+        PRESET_PLAYBACK_SCENE_10 = 0X000A,
+        PRESET_PLAYBACK_SCENE_11 = 0X000B,
+        PRESET_PLAYBACK_SCENE_12 = 0X000C,
+        PRESET_PLAYBACK_SCENE_13 = 0X000D,
+        PRESET_PLAYBACK_SCENE_14 = 0X000E,
+        PRESET_PLAYBACK_SCENE_15 = 0X000F,
+    }
+
+    public enum LampState
+    {
+        LAMP_OFF = 0x00,
+        LAMP_ON = 0x01,
+        LAMP_STRIKE = 0x02,
+        LAMP_STANDBY = 0x03,
+        LAMP_NOT_PRESENT = 0x04,
+        LAMP_ERROR = 0x7F,
+    }
+
+    public enum LampMode
+    {
+        LAMP_ON_MODE_OFF = 0x00,
+        LAMP_ON_MODE_DMX = 0x01,
+        LAMP_ON_MODE_ON = 0x02,
+        LAMP_ON_MODE_AFTER_CAL = 0x03,
+    }
+
+    public enum SelfTest
+    {
+        SELF_TEST_OFF = 0x00,
+        SELF_TEST_ALL = 0xFF,
+    }
+
+    public enum PowerState
+    {
+        POWER_STATE_FULL_OFF = 0x00,
+        POWER_STATE_SHUTDOWN = 0x01,
+        POWER_STATE_STANDBY = 0x02,
+        POWER_STATE_NORMAL = 0xFF,
+    }
+
+    public enum SensorType
+    {
+        SENS_TEMPERATURE = 0x00,
+        SENS_VOLTAGE = 0x01,
+        SENS_CURRENT = 0x02,
+        SENS_FREQUENCY = 0x03,
+        SENS_RESISTANCE = 0X04,
+        SENS_POWER = 0x05,
+        SENS_MASS = 0x06,
+        SENS_LENGTH = 0x07,
+        SENS_AERA = 0x08,
+        SENS_VOLUME = 0x09,
+        SENS_DENSITY = 0x0A,
+        SENS_VELOCITY = 0x0B,
+        SENS_ACCELERATION = 0x0C,
+        SENS_FORCE = 0x0D,
+        SENS_ENERGY = 0x0E,
+        SENS_PRESSURE = 0x0F,
+        SENS_TIME = 0x10,
+        SENS_ANGLE = 0x11,
+        SENS_POSITIONX = 0x12, //E.G. POSITION OF LAMP ON TRUSS
+        SENS_POSITIONY = 0x13,
+        SENS_POSITIONZ = 0x14,
+        SENS_ANGULAR_VELOCITY = 0x15, //E.G. WIND SPEED
+        SENS_LUMINOUS_INTENSITY = 0x16,
+        SENS_LUMINOUS_FLUX = 0x17,
+        SENS_ILLUMINANCE = 0x18,
+        SENS_CHROMINANCE_RED = 0x19,
+        SENS_CHROMINANCE_GREEN = 0x1A,
+        SENS_CHROMINANCE_BLUE = 0x1B,
+        SENS_CONTACTS = 0x1C, // SWITCH INPUTS
+        SENS_MEMORY = 0x1D, //ROM SIZE
+        SENS_ITEMS = 0x1E, // SCROLLER GEL FRAMES
+        SENS_HUMIDITY = 0x1F,
+        SENS_COUNTER_16BIT = 0x20,
+        SENS_OTHER = 0x7F,
+    }
+
+    public enum SensorUnit
+    {
+        UNITS_NONE = 0x00, //CONTACTS
+        UNITS_CENTIGRADE = 0x01, //TEMPERATURE
+        UNITS_VOLTS_DC = 0x02, //VOLTAGE
+        UNITS_VOLTS_AC_PEAK = 0x03,//vOLTAGE
+        UNITS_VOLTS_AC_RMS = 0x04,//vOLTAGE
+        UNITS_AMPERE_DC = 0x05,//CURRENT
+        UNITS_AMPERE_AC_PEAK = 0x06,//CURRENT
+        UNITS_AMPERE_AC_RMS = 0x07,//CURRENT
+        UNITS_HERTZ = 0x08,//FREQUENCY / ANG_VEL
+        UNITS_OHM = 0x09,//RESISTANCE
+        UNITS_WATT = 0x0A,//POWER
+        UNITS_KILOGRAM = 0x0B,//MASS
+        UNITS_METERS = 0x0C,//LENGTH / POSITION
+        UNITS_METERS_SQUARED = 0x0D,//AREA
+        UNITS_METERS_CUBED = 0x0E,//VOLUME
+        UNITS_KILOGRAMMES_PER_METER_CUBED = 0x0F,//DENSITY
+        UNITS_METERS_PER_SECOND = 0x10,//VELOCITY
+        UNITS_METERS_PER_SECOND_SQUARED = 0x11,//ACCELERATION
+        UNITS_NEWTON = 0x12,//FORCE
+        UNITS_JOULE = 0x13,//ENERGY
+        UNITS_PASCAL = 0x14,//PRESSURE
+        UNITS_SECOND = 0x15,//TIME
+        UNITS_DEGREE = 0x16,//ANGLE
+        UNITS_STERADIAN = 0x17,//ANGLE
+        UNITS_CANDELA = 0x18,//LUMINOUS_INTENSITY
+        UNITS_LUMEN = 0x19,//LUMINOUS_FLUX
+        UNITS_LUX = 0x1A,//ILLUMINANCE
+        UNITS_IRE = 0x1B,//CHROMINANCE
+        UNITS_BYTE = 0x1C,//
+    }
+
+    public enum SensorUnitPrefix
+    {
+        PREFIX_NONE = 0x00, //MULTIPLY BY 1
+        PREFIX_DECI = 0x00, //MULTIPLY BY 10^-1
+        PREFIX_CENTI = 0x00, //MULTIPLY BY 10^-2
+        PREFIX_MILLI = 0x00, //MULTIPLY BY 10^-3
+        PREFIX_MICRO = 0x00, //MULTIPLY BY 10^-6
+        PREFIX_NANO = 0x00, //MULTIPLY BY 10^-9
+        PREFIX_PICO = 0x00, //MULTIPLY BY 10^-12
+        PREFIX_FEMPTO = 0x00, //MULTIPLY BY 10^-15
+        PREFIX_ATTO = 0x00, //MULTIPLY BY 10^-18
+        PREFIX_ZEPTO = 0x00, //MULTIPLY BY 10^-21
+        PREFIX_YOCTO = 0x00, //MULTIPLY BY 10^-24
+        PREFIX_DECA = 0x00, //MULTIPLY BY 10^1
+        PREFIX_HECTO = 0x00, //MULTIPLY BY 10^2
+        PREFIX_KILO = 0x00, //MULTIPLY BY 10^3
+        PREFIX_MEGA = 0x00, //MULTIPLY BY 10^6
+        PREFIX_GIGA = 0x00, //MULTIPLY BY 10^9
+        PREFIX_TERRA = 0x00, //MULTIPLY BY 10^12
+        PREFIX_PETA = 0x00, //MULTIPLY BY 10^15 
+        PREFIX_EXA = 0x00, //MULTIPLY BY 10^18
+        PREFIX_ZETTA = 0x00, //MULTIPLY BY 10^21
+        PREFIX_YOTTA = 0x00, //MULTIPLY BY 10^24
+    }
+        //    Notes:
+        //When a prefix is used with MEMORY, the multiplier refers to binary multiple.i.e.KILO means
+        //multiply by 1024.
+        //When a prefix is used with MASS, note that the UNIT is Kilogram.The prefix PREFIX_MILLI is 
+        //used to denote grams.
+
+    public enum DataType
+    {
+        DS_NOT_DEFINED = 0x00, // NOT DEFINED
+        DS_BIT_FIELD = 0x01, // DATA IS BIT PACKED
+        DS_ASCII = 0x02, // DATA IS A STRING
+        DS_UNSIGNED_BYTE = 0x03, //DATA IS AN ARRAY OF UNSIGNED BYTES
+        DS_SIGNED_BYTE = 0x04, //DATA IS AN ARRAY OF SIGNED BYTES
+        DS_UNSIGNED_WORD = 0x05, //DATA IS AN ARRAY OF UNSIGNED 16-BIT WORDS
+        DS_SIGNED_WORD = 0x06, //DATA IS AN ARRAY OF SIGNED 16-BIT WORDS
+        DS_UNSIGNED_DWORD = 0x07, //DATA IS AN ARRAY OF UNSIGNED 32-BIT WORDS
+        DS_SIGNED_DWORD = 0x08, //DATA IS AN ARRAY OF SIGNED 32-BIT WORDS
+    }
+
+    public enum ParameterDescriptionCommandClass
+    {
+        CC_GET = 0x01, //PID Supports Get Only
+        CC_SET = 0x02, //PID Supports Set Only
+        CC_GET_SET = 0x03, //PID Supports Get & Set
+    }
+
+    public enum ResponseNACKReason
+    {
+        NR_UNKNOWN_PID = 0x0000, // THE RESPONDER CANNOT COMPLY WITH THE REQUEST BECAUSE THE MESSAGE IS NOT IMPLIMENTED IN RESPONDER
+        NR_FORMAT_ERROR = 0x0001, //THE RESPONDER CANNOT INTERPRET REQUEST AS CONTROLLER DATA WAS NOT FORMATTED CORRECTLY
+        NR_HARDWARE_FAULT = 0X002, // THE RESPONDER CANNOT COMPLY DUE TO AN INTERNAL HARDWARE FAULT
+        NR_PROXY_REJECT = 0X0003, //PROXY IS NOT THE RDM LINE MASTER AND CANNOT COMPLY WITH MESSAGE
+        NR_WRITE_PROTEXT = 0X0004, //SET COMMAND NORMALLY ALLOWED BUT BEING BLOCKED CURRENTLY
+        NR_UNSUPPORTED_COMMAND_CLASS = 0X0005, //NOT VALID FOR COMMAND CLASS ATTEMPTED. MAY BE USED WHERE GET ALOWED BUT SET IS NOT SUPPORTED.
+        NR_DATA_OUT_OF_RANGE = 0x0006, // VALUE FOR GIVEN PARAMETER OUT OF ALLOWABLE RANGE OR NOT SUPPORT
+        NR_BUFFER_FULL = 0x0007, // BUFFER OR QUEUE SPACE CURRENTLY HAS NO FREE SPACE TO STORE DATA
+        NR_PACKET_SIZE_UNSUPPORTED = 0x0008, //INCOMING MESSAGE EXCEEDS BUFFER CAPACITY
+        NR_SUB_DEVICE_OUT_OF_RANGE = 0x0009, //SUB-DEVICE IS OUT OF RANGE OF UNKNOWN
+        NR_PROXY_BUFFER_FULL = 0X000A, // THE PROXY BUFFER IS FULL AND CAN NOT STORE ANY MORE QUEUED MESSAGE OR STATUS MESSAGE RESPONSES.
+    }
+
 
 }

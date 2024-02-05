@@ -26,7 +26,7 @@ public class Tester : MonoBehaviour
         _data = new byte[512];
         //client = new UdpClient();
         artnetManager = new ArtnetForUnity.ArtnetManager();
-        artnetManager.Start(1);
+        artnetManager.Start();
 
         IP_ArtnetNode1 = new IPAddress(new byte[] { 2, 0, 0, 200 });
     }
@@ -65,7 +65,7 @@ public class Tester : MonoBehaviour
         //artnetManager.SetArtnetData(0, _data, 1, new IPAddress[] { new IPAddress(new byte[] { 2, 0, 0, 102 }), new IPAddress(new byte[] { 2, 0, 0, 101 }) } );
 
         //Broadcast Artnet 
-        artnetManager.SetArtnetData(0, _data, 0);
+        artnetManager.SetArtnetData(0, _data);
     }
 
 }

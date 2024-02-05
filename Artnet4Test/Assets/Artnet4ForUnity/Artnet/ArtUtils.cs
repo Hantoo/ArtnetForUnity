@@ -11,6 +11,8 @@ namespace ArtnetForUnity
 {
     public static class ArtUtils
     {
+        public static float Diagnostic_DMXPacketQueueFrameRate;
+        public static float Diagnostic_SenderFrameRate;
         public static int ArtnetProtocolRevisionNumber = 14;
         public static int ArtnetPort = 6454;
         public static IPAddress InterfaceIPAddress = new IPAddress(new byte[] { 2, 0, 0, 255 }); //Updates on load of settings;
@@ -318,6 +320,8 @@ namespace ArtnetForUnity
                 ? value.Substring(0, maxLength) + truncationSuffix
                 : value;
         }
+
+        
     }
 
     public enum OpCodes
@@ -406,11 +410,24 @@ namespace ArtnetForUnity
 
 
 
-    public struct ArtnetSettings
+    public class ArtnetSettings
     {
         public string IPAddress;
         public string InterfaceName;
         public bool useArtSync;
+        public List<ArtnetOutputs> artnetOutputs = new List<ArtnetOutputs>();
     }
+
+    public class ArtnetOutputs
+    {
+        public int DMXUniverse;
+        public int Net;
+        public int Subnet;
+        public int Universe;
+        public byte[] DMXData = new byte[512];
+        public List<string> NodeRevcIPAddress = new List<string>();
+    }
+
+  
 
 }

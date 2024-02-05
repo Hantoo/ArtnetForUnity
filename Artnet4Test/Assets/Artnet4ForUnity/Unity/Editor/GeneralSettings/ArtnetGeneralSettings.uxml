@@ -1,22 +1,32 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <Style src="project://database/Assets/Artnet4ForUnity/Unity/Editor/ArtnetGeneralSettings.uss?fileID=7433441132597879392&amp;guid=20fae1ddcd3e9a8439d7fe5e06b5d5f0&amp;type=3#ArtnetGeneralSettings" />
-    <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); min-width: 300px;">
-        <ui:Label tabindex="-1" text="ART-NET CONFIGURATION" display-tooltip-when-elided="true" style="height: 26px; width: 210px; -unity-font-style: bold; -unity-text-align: middle-left; font-size: 16px; white-space: nowrap; justify-content: flex-start;" />
-        <ui:Button text="Save Settings" display-tooltip-when-elided="true" name="Button_SaveGeneralSettings" style="height: 29px; width: 143px; position: absolute; top: 0; align-self: flex-end; justify-content: center; transform-origin: right; align-items: flex-end; right: 0;" />
-        <ui:GroupBox name="GroupBox" style="margin-top: 0; padding-top: 0;">
-            <ui:Label tabindex="-1" text="    Network Interfaces" display-tooltip-when-elided="true" style="background-color: rgb(38, 38, 38); color: rgb(255, 255, 255); left: -10px; width: 105%; -unity-text-align: middle-left;">
-                <ui:Label tabindex="-1" text="#.#.#.#" display-tooltip-when-elided="true" name="Label_IpAddressUsage" style="background-color: rgba(38, 38, 38, 0); color: rgb(255, 255, 255); width: 381px; -unity-text-align: middle-right; font-size: 10px; margin-top: 0; margin-bottom: 0; height: 27px; transform-origin: right; position: relative; align-self: flex-end; right: 2%;" />
-            </ui:Label>
-            <ui:RadioButtonGroup value="-1" choices="UnityEngine.UIElements.RadioButtonGroup+&lt;get_choices&gt;d__7" name="NetworkInterfaceRadioGroup" />
-        </ui:GroupBox>
-    </ui:VisualElement>
-    <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0);">
-        <ui:Label tabindex="-1" text="    Settings" display-tooltip-when-elided="true" style="background-color: rgb(38, 38, 38); color: rgb(255, 255, 255); left: -10px; width: 105%; -unity-text-align: middle-left;" />
-        <ui:Toggle label="Use ArtSync Packets" name="ToggleArtSync" style="flex-direction: row-reverse; justify-content: flex-start; white-space: normal; -unity-text-align: middle-left; flex-wrap: nowrap; max-width: 207px;" />
-    </ui:VisualElement>
-    <ui:GroupBox>
-        <ui:Label tabindex="-1" text="    ART-NET NODES" display-tooltip-when-elided="true" style="background-color: rgb(38, 38, 38); color: rgb(255, 255, 255); left: -10px; width: 105%; -unity-font-style: bold; font-size: 10px; height: 27px; -unity-text-align: middle-left;" />
-        <ui:Button text="Refresh" display-tooltip-when-elided="true" name="Button_RefreshList" style="height: 20px; width: 80px; position: absolute; top: 11px; border-left-width: 0; border-right-width: 0; border-top-width: 0; align-self: flex-end; justify-content: center; align-items: flex-end; transform-origin: right; right: 0;" />
-        <ui:ListView focusable="true" header-title="Nodes" name="NodeList" binding-path="artNetNodesList" style="--unity-item-height: 35; margin-top: 8px;" />
-    </ui:GroupBox>
+    <Style src="project://database/Assets/Artnet4ForUnity/Unity/Editor/GeneralSettings/ArtnetGeneralSettings.uss?fileID=7433441132597879392&amp;guid=20fae1ddcd3e9a8439d7fe5e06b5d5f0&amp;type=3#ArtnetGeneralSettings" />
+    <ui:ScrollView name="ScrollView" horizontal-scroller-visibility="Hidden">
+        <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0);">
+            <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); min-width: 300px; max-height: 400px; min-height: 100px;">
+                <ui:Label tabindex="-1" text="ART-NET CONFIGURATION" display-tooltip-when-elided="true" style="height: 26px; width: 210px; -unity-font-style: bold; -unity-text-align: middle-left; font-size: 16px; white-space: nowrap; justify-content: flex-start;" />
+                <ui:Button text="Save Settings" display-tooltip-when-elided="true" name="Button_SaveGeneralSettings" style="height: 29px; width: 143px; position: absolute; top: 0; align-self: flex-end; justify-content: center; transform-origin: right; align-items: flex-end; right: 0;" />
+                <ui:GroupBox name="GroupBox" style="margin-top: 0; padding-top: 0;">
+                    <ui:Label tabindex="-1" text="    Network Interfaces" display-tooltip-when-elided="true" style="background-color: rgb(38, 38, 38); color: rgb(255, 255, 255); left: -10px; width: 105%; -unity-text-align: middle-left;">
+                        <ui:Label tabindex="-1" text="#.#.#.#" display-tooltip-when-elided="true" name="Label_IpAddressUsage" style="background-color: rgba(38, 38, 38, 0); color: rgb(255, 255, 255); width: 381px; -unity-text-align: middle-right; font-size: 10px; margin-top: 0; margin-bottom: 0; height: 27px; transform-origin: right; position: relative; align-self: flex-end; right: 5%;" />
+                    </ui:Label>
+                    <ui:RadioButtonGroup value="-1" choices="UnityEngine.UIElements.RadioButtonGroup+&lt;get_choices&gt;d__7" name="NetworkInterfaceRadioGroup" />
+                </ui:GroupBox>
+            </ui:VisualElement>
+            <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); min-height: 20px; max-height: 80px;">
+                <ui:Label tabindex="-1" text="    Settings" display-tooltip-when-elided="true" style="background-color: rgb(38, 38, 38); color: rgb(255, 255, 255); left: -10px; width: 105%; -unity-text-align: middle-left;" />
+                <ui:Toggle label="Use ArtSync Packets" name="ToggleArtSync" style="flex-direction: row-reverse; justify-content: flex-start; white-space: normal; -unity-text-align: middle-left; flex-wrap: nowrap; max-width: 207px;" />
+            </ui:VisualElement>
+            <ui:GroupBox name="GroupBox">
+                <ui:Label tabindex="-1" text="    DMX OUTPUTS" display-tooltip-when-elided="true" style="background-color: rgb(38, 38, 38); color: rgb(255, 255, 255); left: -10px; width: 105%; -unity-font-style: bold; font-size: 10px; height: 27px; -unity-text-align: middle-left;" />
+                <ui:Button text="Add Output" display-tooltip-when-elided="true" name="Button_AddDMXOuput" style="height: 20px; width: 80px; position: absolute; top: 11px; border-left-width: 0; border-right-width: 0; border-top-width: 0; align-self: flex-end; justify-content: center; align-items: flex-end; transform-origin: right; right: 0;" />
+                <ui:ListView focusable="true" header-title="Nodes" name="DMXOutputList" binding-path="artNetNodesList" style="--unity-item-height: 35; margin-top: 8px;" />
+                <ui:ScrollView name="DMXOutputList_Scroll" vertical-scroller-visibility="AlwaysVisible" horizontal-scroller-visibility="Hidden" style="flex-shrink: 0; height: 200px; max-height: 1000px; min-height: 200px;" />
+            </ui:GroupBox>
+            <ui:GroupBox name="GroupBox" style="max-height: 600px; min-height: 300px;">
+                <ui:Label tabindex="-1" text="    ART-NET NODES" display-tooltip-when-elided="true" style="background-color: rgb(38, 38, 38); color: rgb(255, 255, 255); left: -10px; width: 105%; -unity-font-style: bold; font-size: 10px; height: 27px; -unity-text-align: middle-left;" />
+                <ui:Button text="Refresh" display-tooltip-when-elided="true" name="Button_RefreshList" style="height: 20px; width: 80px; position: absolute; top: 11px; border-left-width: 0; border-right-width: 0; border-top-width: 0; align-self: flex-end; justify-content: center; align-items: flex-end; transform-origin: right; right: 0;" />
+                <ui:ListView focusable="true" header-title="Nodes" name="NodeList" binding-path="artNetNodesList" style="--unity-item-height: 35; margin-top: 8px;" />
+            </ui:GroupBox>
+        </ui:VisualElement>
+    </ui:ScrollView>
 </ui:UXML>
