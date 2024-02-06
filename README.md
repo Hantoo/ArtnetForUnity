@@ -5,6 +5,7 @@
 ## What is this? - And why another Artnet Lib?
 This is a project to implement Art-Net4 into Unity. I have used alot of different artnet libaries for Unity before and have not found one which has been really nice to use and simple to implement.
 
+
 Currently Implemented Artnet 4 Features (Will be implementing more features of Art-Net4)
 
 | ArtDMX | ArtPoll    | ArtPollReply   |  ArtSync   |  ArtTimecode     |  ArtIpProg   |   ArtInput   |  ArtRDM   |  ArtVlc  | ArtCommand | ArtTrigger |
@@ -102,3 +103,11 @@ If the nubers are red then you are receiving timecode from another device. If th
 ## External Packages Used
 * Newtonsoft Json (com.unity.nuget.newtonsoft-json)
 * Editor Coroutines (com.unity.editorcoroutines)
+
+## TroubleShooting
+
+### I can't see my ArtNet device in Unity
+If you can't see the artnet device in unity or within the Artnet General Settings window, but you know it's definately on the correct network then check your FireWall rules for inbound connection.
+By default, the unity editor is normally blocked on public connections. Allowing the connection should fix this.
+![image](https://github.com/Hantoo/ArtnetForUnity/assets/1647342/4d3b042f-587a-41d6-8cad-5720839efeae)
+![image](https://github.com/Hantoo/ArtnetForUnity/assets/1647342/4bce5c4f-507b-45a3-a07c-935d453d50f4)
