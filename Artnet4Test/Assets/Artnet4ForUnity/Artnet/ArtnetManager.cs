@@ -85,12 +85,13 @@ namespace ArtnetForUnity
             udpClient = new UdpClient();
             udpClient.ExclusiveAddressUse = false;
             udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-            //udpClient.Client.Bind(endPointSend);
+            udpClient.Client.Bind(endPointSend);
 
             udpRevcClient = new UdpClient();
             udpRevcClient.ExclusiveAddressUse = false;
             udpRevcClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-            udpRevcClient.Client.Bind(endPointRecv);
+            //udpRevcClient.Client.Bind(endPointRecv);
+            udpRevcClient.Client.Bind(endPointSend);
 
             RecvCallBack += Recv_Callback;
 
@@ -108,7 +109,7 @@ namespace ArtnetForUnity
         public byte[] _data_PollRequestReply;
 
         private static ArtnetForUnity.ArtDMXPacket[] ArtnetUniverseValues;
-
+        private bool gameRunning = false;
         public void Start()
         {
             //Creates byte array ready for data
@@ -126,6 +127,7 @@ namespace ArtnetForUnity
             //Create array or artDMX packets ready to be sent 
             ArtnetUniverseValues = new ArtnetForUnity.ArtDMXPacket[settings.artnetOutputs.Count];
             new Thread(ArtnetThreadLoop) { IsBackground = true }.Start();
+            gameRunning = Application.isPlaying;
         }
 
         public void SetArtnetData(int UnityUniverseNumber, byte[] UniverseData, IPAddress[] address = null)
@@ -161,8 +163,9 @@ namespace ArtnetForUnity
                 timecodeManager.Update();
 
 
-                #if UNITY_STANDALONE
+#if UNITY_STANDALONE
                 //Send DMX
+                if (gameRunning) 
                 if (settings != null && settings.artnetOutputs != null)
                 if (settings.artnetOutputs.Count > 0)
                     try
@@ -280,7 +283,7 @@ namespace ArtnetForUnity
                 {
 
                     IPPacket pkt = SendQueue.Take();
-                    //Debug.Log("Packet:" + pkt.opCode + " | " + pkt.ipAddress.ToString());
+                    //UnityEngine.Debug.Log("Packet:" + pkt.ipAddress + " | " + pkt.ipAddress.ToString());
                     endPointSend = new IPEndPoint(pkt.ipAddress, ArtnetForUnity.ArtUtils.ArtnetPort);
                     //udpClient.Client.Bind(endPointSend);
                     udpClient.Send(pkt.pktData, pkt.pktData.Length, endPointSend);
@@ -310,9 +313,10 @@ namespace ArtnetForUnity
                 IPPacket pkt = new IPPacket();
                 pkt.pktData = udpRevcClient.Receive(ref endPointRecv);
                 pkt.ipAddress = endPointRecv.Address;
-                UnityEngine.Debug.Log("pkt.pktData Len:" + pkt.pktData.Length);
+                UnityEngine.Debug.Log("Revc Packet From:" + pkt.ipAddress.ToString());
                 if(pkt.pktData.Length < 9) UnityEngine.Debug.Log("Artnet Packet Recvievd Formatted Wrongly pkt.pktData Len:" + pkt.pktData.Length);
                 pkt.opCode = ArtUtils.ByteToOpCode(pkt.pktData[8], pkt.pktData[9]);
+                UnityEngine.Debug.Log("Packet Type:" + pkt.opCode.ToString());
                 if (ListenQueue != null)
                 {
                     ListenQueue.Add(pkt);

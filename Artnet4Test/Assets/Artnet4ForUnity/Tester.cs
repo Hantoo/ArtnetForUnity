@@ -28,7 +28,6 @@ public class Tester : MonoBehaviour
         artnetManager = new ArtnetForUnity.ArtnetManager();
         artnetManager.Start();
 
-        IP_ArtnetNode1 = new IPAddress(new byte[] { 2, 0, 0, 200 });
     }
 
     private void OnDestroy()

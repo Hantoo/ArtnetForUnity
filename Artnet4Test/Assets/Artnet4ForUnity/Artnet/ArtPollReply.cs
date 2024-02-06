@@ -218,8 +218,11 @@ namespace ArtnetForUnity
         public static string GetName(byte[] data)
         {
             byte[] PortName = new byte[18];
-            Array.Copy(data,26, PortName, 0, 18);
-            return System.Text.Encoding.ASCII.GetString(PortName);
+            Array.Copy(data,26, PortName, 0, PortName.Length);
+           
+            byte[] LongName = new byte[64];
+            Array.Copy(data,44, LongName, 0, LongName.Length);
+            return (System.Text.Encoding.ASCII.GetString(LongName).TrimEnd() + " | " + System.Text.Encoding.ASCII.GetString(PortName)); 
         }
 
 
