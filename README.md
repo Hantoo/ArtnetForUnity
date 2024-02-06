@@ -85,8 +85,8 @@ Once set, you play the Timecode by invoking the ``` TimecodeManager.playTimecode
 If you're sending timecode from Unity, To stop the timecode receiver from reading the timecode packets sent - any timecode packets received from the same IP address as the selected Art-Net Interface for Unity will be ignored.
 
 ## Screenshots
-<img width="499" alt="Screenshot 2023-09-12 103735" src="https://github.com/Hantoo/ArtnetForUnity/assets/1647342/6c70a732-a2ae-4b1c-8c5b-6a4c783f220b">
 
+![image](https://github.com/Hantoo/ArtnetForUnity/assets/1647342/ba96764c-1275-490f-9af2-d032c6c1b793)
 
 Image above shows the UI panel, found under Artnet > General Settings. From here you can choose the NIC that Art-Net uses as well as the Art-Net complient nodes found on the network.
 The nodes status update every 4 seconds. 
