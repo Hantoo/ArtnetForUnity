@@ -10,7 +10,7 @@ Currently Implemented Artnet 4 Features (Will be implementing more features of A
 
 | ArtDMX | ArtPoll    | ArtPollReply   |  ArtSync   |  ArtTimecode     |  ArtIpProg   |   ArtInput   |  ArtRDM   |  ArtVlc  | ArtCommand | ArtTrigger |
 | :---:   | :---: | :---: | :---: |:---: |:---: |:---: |:---: |:---: |:---: |:---: |
-| ✅ | ✅   | ✅  |  ✅  |  ✅  |  ❌  | ❌ | ❌ | ❌ | ❌ | ❌  |
+| ✅ | ✅   | ✅  |  ✅  |  ✅  |  ❌  | ❌ | ⏰ | ❌ | ❌ | ❌  |
 
 
 ✅ = Fully Implemented 
