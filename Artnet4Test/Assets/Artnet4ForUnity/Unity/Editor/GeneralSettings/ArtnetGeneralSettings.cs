@@ -180,7 +180,7 @@ public class ArtnetGeneralSettings : EditorWindow
         var ArtnetDMXIPAddress = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Artnet4ForUnity/Unity/Editor/GeneralSettings/ArtnetDMXIpAddress.uxml");
         var e = ArtnetDMXIPAddress.Instantiate();
         var text_IPAddress = e.Q<TextField>("IPAddressText");
-       
+        
         if (NodeIPIndex == -1)
         {
 
@@ -195,17 +195,17 @@ public class ArtnetGeneralSettings : EditorWindow
             //Address exists
             text_IPAddress.value = artNetOutputs[OutputIndex].NodeRevcIPAddress[NodeIPIndex];
         }
-
+      
         text_IPAddress.RegisterValueChangedCallback(evt =>
         {
             artNetOutputs[OutputIndex].NodeRevcIPAddress[NodeIPIndex] = text_IPAddress.value;
             unSavedChanges(true); ;
         });
-
+       
         var btn_deleteIP = e.Q<Button>("RemoveIPAddressButton");
         btn_deleteIP.RegisterCallback<ClickEvent>(evt =>
         {
-            RemoveArtnetNodeIP(root, OutputIndex, NodeIPIndex);
+            RemoveArtnetNodeIP(root, e, OutputIndex, NodeIPIndex);
             unSavedChanges(true);
         });
        
@@ -215,9 +215,10 @@ public class ArtnetGeneralSettings : EditorWindow
   
     public void RefreshArtnetNodeIP(int OutputIndex)
     {
-       
-            try
+
+        try
             {
+
                 DMXListView.ElementAt(OutputIndex).Q<VisualElement>("G_IpAddressesVE").Clear();
             }
             catch (Exception e) { Debug.LogError(e.Message); };
@@ -232,11 +233,10 @@ public class ArtnetGeneralSettings : EditorWindow
 
     }
 
-    public void RemoveArtnetNodeIP(VisualElement root, int OutputIndex, int IPindex)
+    public void RemoveArtnetNodeIP(VisualElement root, VisualElement e, int OutputIndex, int IPindex)
     {
-       
         artNetOutputs[OutputIndex].NodeRevcIPAddress.RemoveAt(IPindex);
-        root.RemoveAt(OutputIndex);
+        root.Remove(e);
         settings.artnetOutputs = artNetOutputs;
         RefreshArtnetNodeIP(OutputIndex);
      
@@ -253,11 +253,13 @@ public class ArtnetGeneralSettings : EditorWindow
         unSavedChanges(true);
         //Add to Artnet Outputs as new
         ArtnetForUnity.ArtnetOutputs output = new ArtnetForUnity.ArtnetOutputs();
+        output.Universe = artNetOutputs.Count + 1;
         output.NodeRevcIPAddress.Add(ArtnetForUnity.ArtUtils.broadcastAddress.ToString());
         artNetOutputs.Add(output);
         settings.artnetOutputs = artNetOutputs;
-
-        CreateDMXOutputList(root, settings.artnetOutputs.Count -1);
+        
+        CreateDMXOutputList(root, settings.artnetOutputs.Count-1);
+        RefreshDMXList();
 
     }
 
@@ -324,8 +326,8 @@ public class ArtnetGeneralSettings : EditorWindow
         Button AddIPButton = e.Q<Button>("Btn_IPAddressAdd");
         AddIPButton.RegisterCallback<ClickEvent>(evt =>
         {
-      
-            AddArtnetNodeIP(DMXListView.ElementAt(i),i);
+            
+            AddArtnetNodeIP(DMXListView.ElementAt(i).Q<VisualElement>("G_IpAddressesVE"), i);
             unSavedChanges(true);
 
         });

@@ -64,7 +64,8 @@ namespace ArtnetForUnity
         private int frameRateOfPacketQueueCompileIncrement = 0;
         public float AvgframeRateOfPacketQueueCompile;
         private Stopwatch frameRateOfPacketQueueCompileStopWatch;
-         
+
+        bool Diag_Verbose = false;
 
         private void init()
         {
@@ -130,9 +131,9 @@ namespace ArtnetForUnity
             gameRunning = Application.isPlaying;
         }
 
-        public void SetArtnetData(int UnityUniverseNumber, byte[] UniverseData, IPAddress[] address = null)
+        public void SetArtnetData(int UnityUniverseNumber, byte[] UniverseData)
         {
-            if(address == null) { address = new IPAddress[] { ArtUtils.broadcastAddress }; }
+
             settings.artnetOutputs[UnityUniverseNumber].DMXData = UniverseData;
          }
 
@@ -252,6 +253,7 @@ namespace ArtnetForUnity
                 device.connected = true;
                 device.ipAddress = pkt.ipAddress;
                 device.name = ArtPollReply.GetName(pkt.pktData);
+                device.bindIndex = ArtPollReply.GetBindIndex(pkt.pktData);
                 CheckArtPortWithDeviceList(device);
             }
 
@@ -313,10 +315,10 @@ namespace ArtnetForUnity
                 IPPacket pkt = new IPPacket();
                 pkt.pktData = udpRevcClient.Receive(ref endPointRecv);
                 pkt.ipAddress = endPointRecv.Address;
-                UnityEngine.Debug.Log("Revc Packet From:" + pkt.ipAddress.ToString());
+                if(Diag_Verbose)UnityEngine.Debug.Log("Revc Packet From:" + pkt.ipAddress.ToString());
                 if(pkt.pktData.Length < 9) UnityEngine.Debug.Log("Artnet Packet Recvievd Formatted Wrongly pkt.pktData Len:" + pkt.pktData.Length);
                 pkt.opCode = ArtUtils.ByteToOpCode(pkt.pktData[8], pkt.pktData[9]);
-                UnityEngine.Debug.Log("Packet Type:" + pkt.opCode.ToString());
+                if(Diag_Verbose)UnityEngine.Debug.Log("Packet Type:" + pkt.opCode.ToString());
                 if (ListenQueue != null)
                 {
                     ListenQueue.Add(pkt);
@@ -356,7 +358,7 @@ namespace ArtnetForUnity
             bool found = false;
             for (int i = 0; i < deviceList.Count; i++)
             {
-                if (device.ipAddress.ToString() == deviceList[i].ipAddress.ToString())
+                if ((device.ipAddress.ToString() == deviceList[i].ipAddress.ToString()) && device.bindIndex == deviceList[i].bindIndex)
                 {
                     ArtnetDevice _d = deviceList[i];
                     _d.connected = true;
@@ -432,13 +434,13 @@ namespace ArtnetForUnity
     [Serializable]
     public struct ArtnetDevice
     {
-       
+        
         public string name;
         public string longName;
         public IPAddress ipAddress;
         public bool connected;
         public int offlineTicker;
-
+        public int bindIndex;
         public SubscriberTable subscriberTable;
     }
 

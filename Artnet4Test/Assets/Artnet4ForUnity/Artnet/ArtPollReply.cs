@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text;
 using UnityEngine;
+using UnityEngine.XR;
 
 
 namespace ArtnetForUnity
@@ -218,13 +219,27 @@ namespace ArtnetForUnity
         public static string GetName(byte[] data)
         {
             byte[] PortName = new byte[18];
-            Array.Copy(data,26, PortName, 0, PortName.Length);
+            Array.Copy(data, 26, PortName, 0, PortName.Length);
+            //Remove any 0x00 in array as it messes up concat-ing strings
+            for (int i = 0; i < PortName.Length; i++)
+                if (PortName[i] == 0x00) PortName[i] = 0x20;
+            
            
             byte[] LongName = new byte[64];
             Array.Copy(data,44, LongName, 0, LongName.Length);
-            return (System.Text.Encoding.ASCII.GetString(LongName).TrimEnd() + " | " + System.Text.Encoding.ASCII.GetString(PortName)); 
+            for (int i = 0; i < LongName.Length; i++)
+                if (LongName[i] == 0x00) LongName[i] = 0x20;
+
+           
+            string name = String.Format("[{1}] | {0}",System.Text.Encoding.ASCII.GetString(PortName).TrimEnd().ToString(),(System.Text.Encoding.ASCII.GetString(LongName).TrimEnd().ToString()));
+          
+            return (name); 
         }
 
+        public static int GetBindIndex(byte[] data)
+        {
+            return (int)data[211];
+        }
 
         public struct GoodInput
         {

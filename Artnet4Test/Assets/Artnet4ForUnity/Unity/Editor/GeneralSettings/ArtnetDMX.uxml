@@ -8,19 +8,19 @@
                 <ui:Label tabindex="-1" text="Unity Uni" display-tooltip-when-elided="true" style="font-size: 7px; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; -unity-font-style: normal; color: rgb(255, 255, 255);" />
             </ui:VisualElement>
             <ui:VisualElement name="G_ArtnetUni" style="flex-grow: 0; background-color: rgba(0, 0, 0, 0); flex-shrink: 0; align-items: center; -unity-background-image-tint-color: rgb(89, 89, 89);">
-                <ui:TextField name="ArtnetUniText" style="width: 40px; -unity-text-align: upper-center; font-size: 8px; -unity-background-image-tint-color: rgb(58, 58, 58);" />
+                <ui:TextField name="ArtnetUniText" readonly="true" style="width: 40px; -unity-text-align: upper-center; font-size: 8px; -unity-background-image-tint-color: rgb(58, 58, 58);" />
                 <ui:Label tabindex="-1" text="Artnet Uni" display-tooltip-when-elided="true" style="font-size: 7px; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; -unity-font-style: normal; color: rgb(255, 255, 255);" />
             </ui:VisualElement>
             <ui:VisualElement name="G_Net" style="flex-grow: 0; background-color: rgba(0, 0, 0, 0); flex-shrink: 0; align-items: center; -unity-background-image-tint-color: rgb(89, 89, 89);">
-                <ui:TextField picking-mode="Ignore" name="NetText" style="width: 40px; -unity-text-align: upper-center; font-size: 8px; -unity-background-image-tint-color: rgb(58, 58, 58);" />
+                <ui:TextField picking-mode="Ignore" name="NetText" readonly="true" focusable="false" style="width: 40px; -unity-text-align: upper-center; font-size: 8px; -unity-background-image-tint-color: rgb(58, 58, 58);" />
                 <ui:Label tabindex="-1" text="_Net" display-tooltip-when-elided="true" style="font-size: 7px; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; -unity-font-style: normal; color: rgb(255, 255, 255);" />
             </ui:VisualElement>
             <ui:VisualElement name="G_Subnet" style="flex-grow: 0; background-color: rgba(0, 0, 0, 0); flex-shrink: 0; align-items: center; -unity-background-image-tint-color: rgb(89, 89, 89);">
-                <ui:TextField picking-mode="Ignore" name="SubnetText" style="width: 40px; -unity-text-align: upper-center; font-size: 8px; -unity-background-image-tint-color: rgb(58, 58, 58);" />
+                <ui:TextField picking-mode="Ignore" name="SubnetText" readonly="true" focusable="false" style="width: 40px; -unity-text-align: upper-center; font-size: 8px; -unity-background-image-tint-color: rgb(58, 58, 58);" />
                 <ui:Label tabindex="-1" text="_Subnet" display-tooltip-when-elided="true" style="font-size: 7px; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; -unity-font-style: normal; color: rgb(255, 255, 255);" />
             </ui:VisualElement>
             <ui:VisualElement name="G_Uni" style="flex-grow: 0; background-color: rgba(0, 0, 0, 0); flex-shrink: 0; align-items: center; -unity-background-image-tint-color: rgb(89, 89, 89);">
-                <ui:TextField picking-mode="Ignore" name="UniText" style="width: 40px; -unity-text-align: upper-center; font-size: 8px; -unity-background-image-tint-color: rgb(58, 58, 58);" />
+                <ui:TextField picking-mode="Ignore" name="UniText" readonly="true" focusable="false" style="width: 40px; -unity-text-align: upper-center; font-size: 8px; -unity-background-image-tint-color: rgb(58, 58, 58);" />
                 <ui:Label tabindex="-1" text="_Uni" display-tooltip-when-elided="true" style="font-size: 7px; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; -unity-font-style: normal; color: rgb(255, 255, 255);" />
             </ui:VisualElement>
         </ui:VisualElement>

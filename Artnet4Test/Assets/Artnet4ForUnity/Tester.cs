@@ -4,6 +4,7 @@ using UnityEngine;
 using System.Net;
 using System;
 using System.Net.Sockets;
+using ArtnetForUnity;
 
 public class Tester : MonoBehaviour
 {
@@ -45,26 +46,19 @@ public class Tester : MonoBehaviour
         elapsedTime += (Time.deltaTime * speed);
         int sine = (int)(((Mathf.Sin(elapsedTime) +1f)/2f)*255f);
         if (timer < elpasedTime) elpasedTime = 0;
-        int pxl = (int)((elpasedTime / timer) * 19) * 3;
+        int pxl = (int)((elpasedTime / timer) * 169) * 3;
         _data[pxl] = (byte)(sine * RedMaster);
         _data[pxl+1] = (byte)(sine * GreenMaster);
         _data[pxl+2] = (byte)(sine * BlueMaster);
-        //for(int i = 0; i < _data.Length; i++) {
-        //    if(i % 3 == 0)
-        //        _data[i] = (byte)(sine * RedMaster);
-        //    if (i % 3 == 1)
-        //        _data[i] = (byte)(sine * GreenMaster);
-        //    if (i % 3 == 2)
-        //        _data[i] = (byte)(sine * BlueMaster);
-        //}
+
 
         elpasedTime += Time.deltaTime;
-        
-        //Send Artnet to Direct IP Addresses 
-        //artnetManager.SetArtnetData(0, _data, 1, new IPAddress[] { new IPAddress(new byte[] { 2, 0, 0, 102 }), new IPAddress(new byte[] { 2, 0, 0, 101 }) } );
 
-        //Broadcast Artnet 
+        //Send Artnet to Direct IP Addresses in settings
         artnetManager.SetArtnetData(0, _data);
+        //artnetManager.SetArtnetData(1, _data);
+        //artnetManager.SetArtnetData(2, _data);
+        //artnetManager.SetArtnetData(3, _data);
     }
 
 }

@@ -2,8 +2,7 @@
     <ui:VisualElement style="flex-grow: 0; background-color: rgba(0, 0, 0, 0); white-space: normal; flex-direction: row; flex-shrink: 0; max-width: 90%;">
         <ui:TextField picking-mode="Ignore" value="filler text" name="IPAddressText" style="flex-grow: 1; height: 39px; left: 29px; flex-shrink: 1;" />
         <ui:VisualElement style="flex-grow: 0; background-color: rgba(0, 0, 0, 0); flex-shrink: 0; max-height: 39px; min-height: 39px; left: 26px;">
-            <ui:Button text="&gt;" display-tooltip-when-elided="true" name="Button" style="height: 12px; padding-top: 7px; padding-bottom: 7px;" />
-            <ui:Button text="X" display-tooltip-when-elided="true" name="RemoveIPAddressButton" style="height: 12px; color: rgb(255, 0, 0); padding-top: 7px; padding-bottom: 7px;" />
+            <ui:Button text="X" display-tooltip-when-elided="true" name="RemoveIPAddressButton" style="height: 39px; color: rgb(255, 0, 0); padding-top: 7px; padding-bottom: 7px;" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

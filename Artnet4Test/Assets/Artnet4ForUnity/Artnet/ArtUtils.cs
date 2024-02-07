@@ -9,6 +9,7 @@ using UnityEngine;
 
 namespace ArtnetForUnity
 {
+    //ToDo: Make artnet settings a static here and when loaded it gets updated here - then all classes that use it pull from here.
     public static class ArtUtils
     {
         public static float Diagnostic_DMXPacketQueueFrameRate;
@@ -426,6 +427,8 @@ namespace ArtnetForUnity
         public int Universe;
         public byte[] DMXData = new byte[512];
         public List<string> NodeRevcIPAddress = new List<string>();
+
+        //ToDo: Calculate artnet subnet net and universe based on Artnetoutput in settings;
     }
 
   
