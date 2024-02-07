@@ -11,7 +11,7 @@ public class RdmViewer : EditorWindow
     private ArtnetForUnity.ArtnetSettings settings;
     private VisualElement root;
 
-    [MenuItem("Artnet/RdmViewer")]
+    //[MenuItem("Artnet/RdmViewer")]
     public static void ShowExample()
     {
         RdmViewer wnd = GetWindow<RdmViewer>();
