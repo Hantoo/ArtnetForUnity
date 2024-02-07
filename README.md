@@ -10,7 +10,7 @@ Currently Implemented Artnet 4 Features (Will be implementing more features of A
 
 | ArtDMX | ArtPoll    | ArtPollReply   |  ArtSync   |  ArtTimecode     |  ArtIpProg   |   ArtInput   |  ArtRDM   |  ArtVlc  | ArtCommand | ArtTrigger |
 | :---:   | :---: | :---: | :---: |:---: |:---: |:---: |:---: |:---: |:---: |:---: |
-| ✅ | ✅   | ✅  |  ✅  |  ✅  |  ❌  | ❌ | ❌ | ❌ | ❌ | ❌  |
+| ✅ | ✅   | ✅  |  ✅  |  ✅  |  ❌  | ❌ | ⏰ | ❌ | ❌ | ❌  |
 
 
 ✅ = Fully Implemented 
@@ -29,12 +29,11 @@ Included in the project is a Tester.cs script which shows you exactly how to use
     public void Start()
     {
         artnetManager = new ArtnetForUnity.ArtnetManager();
-        artnetManager.Start(1);
+        artnetManager.Start();
     }
 ````
 Initalising the Artnet manager will create the UDP threaded sender and listener. 
-The Start method initalises how many Art-Net universes you wish to send. These universes don't have to be in order, for instance, I could initalise 4 universes. Index 0 of my universes could be DMX universe 1, index 1 of my unverses could be Universe 3, index 2 = Uni 12 and index 3 = Uni 14.
-In the example above we are initalising with one universe.
+The Start method initalises how many Art-Net universes you wish to send. These universes don't have to be in order, for instance, I could initalise 4 universes. Index 0 of my universes could be DMX universe 1, index 1 of my unverses could be Universe 3, index 2 = Uni 12 and index 3 = Uni 14. The amount of universes are dictated by how many DMX Ouputs you've added in the General Settigns Window.
 
 ### OnDestory
 ````
@@ -50,13 +49,10 @@ In the top line, we are sending that byte data directly to 2 IP addresses: 2.0.0
 The bottome line, since we have not specified an IP address, it will broadcast the Art-Net. The broadcast address is calculated based on the IP address and the subnet mask of the selected interface.
 We have the index number as 0 since we only initalised 1 universe above, therefore I want to put the Artnet data into the first universe index slot. I then want this data to show on Art-Net Universe 1, which is why we have a value of 1.
 ```
-    //artnetManager.SetArtnetData([(Int) UNIVERSE INDEX], [(Byte[]) UNIVERSE DATA], [(Int) ART-NET UNIVERSE], [(IPAddress[]) IPAddresses] );
-
-    //Send Artnet to Direct IP Addresses 
-    artnetManager.SetArtnetData(0, _data, 1, new IPAddress[] { new IPAddress(new byte[] { 2, 0, 0, 102 }), new IPAddress(new byte[] { 2, 0, 0, 101 }) } );
+    //artnetManager.SetArtnetData([(Int) UNIVERSE INDEX], [(Byte[]) UNIVERSE DATA]);
 
     //Broadcast Artnet 
-    artnetManager.SetArtnetData(0, _data, 1);
+    artnetManager.SetArtnetData(0, _data);
 ```
 
 ## Packets
@@ -85,8 +81,8 @@ Once set, you play the Timecode by invoking the ``` TimecodeManager.playTimecode
 If you're sending timecode from Unity, To stop the timecode receiver from reading the timecode packets sent - any timecode packets received from the same IP address as the selected Art-Net Interface for Unity will be ignored.
 
 ## Screenshots
-<img width="499" alt="Screenshot 2023-09-12 103735" src="https://github.com/Hantoo/ArtnetForUnity/assets/1647342/6c70a732-a2ae-4b1c-8c5b-6a4c783f220b">
 
+![image](https://github.com/Hantoo/ArtnetForUnity/assets/1647342/ba96764c-1275-490f-9af2-d032c6c1b793)
 
 Image above shows the UI panel, found under Artnet > General Settings. From here you can choose the NIC that Art-Net uses as well as the Art-Net complient nodes found on the network.
 The nodes status update every 4 seconds. 
