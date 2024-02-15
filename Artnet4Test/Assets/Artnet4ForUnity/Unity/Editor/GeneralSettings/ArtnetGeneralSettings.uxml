@@ -2,7 +2,7 @@
     <Style src="project://database/Assets/Artnet4ForUnity/Unity/Editor/GeneralSettings/ArtnetGeneralSettings.uss?fileID=7433441132597879392&amp;guid=20fae1ddcd3e9a8439d7fe5e06b5d5f0&amp;type=3#ArtnetGeneralSettings" />
     <ui:ScrollView name="ScrollView" horizontal-scroller-visibility="Hidden">
         <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0);">
-            <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); min-width: 300px; max-height: 400px; min-height: 100px;">
+            <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); min-width: 300px; min-height: 100px;">
                 <ui:Label tabindex="-1" text="ART-NET CONFIGURATION" display-tooltip-when-elided="true" style="height: 26px; width: 210px; -unity-font-style: bold; -unity-text-align: middle-left; font-size: 16px; white-space: nowrap; justify-content: flex-start;" />
                 <ui:Button text="Save Settings" display-tooltip-when-elided="true" name="Button_SaveGeneralSettings" style="height: 29px; width: 143px; position: absolute; top: 0; align-self: flex-end; justify-content: center; transform-origin: right; align-items: flex-end; right: 0;" />
                 <ui:GroupBox name="GroupBox" style="margin-top: 0; padding-top: 0;">

@@ -253,7 +253,7 @@ public class ArtnetGeneralSettings : EditorWindow
         unSavedChanges(true);
         //Add to Artnet Outputs as new
         ArtnetForUnity.ArtnetOutputs output = new ArtnetForUnity.ArtnetOutputs();
-        output.Universe = artNetOutputs.Count + 1;
+        //output.Universe = artNetOutputs.Count;
         output.NodeRevcIPAddress.Add(ArtnetForUnity.ArtUtils.broadcastAddress.ToString());
         artNetOutputs.Add(output);
         settings.artnetOutputs = artNetOutputs;

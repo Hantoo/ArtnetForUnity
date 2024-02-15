@@ -87,12 +87,14 @@ namespace ArtnetForUnity
             udpClient.ExclusiveAddressUse = false;
             udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
             udpClient.Client.Bind(endPointSend);
+            udpClient.EnableBroadcast = true;
 
             udpRevcClient = new UdpClient();
             udpRevcClient.ExclusiveAddressUse = false;
             udpRevcClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
             //udpRevcClient.Client.Bind(endPointRecv);
             udpRevcClient.Client.Bind(endPointSend);
+            udpRevcClient.EnableBroadcast = true;
 
             RecvCallBack += Recv_Callback;
 
@@ -133,8 +135,11 @@ namespace ArtnetForUnity
 
         public void SetArtnetData(int UnityUniverseNumber, byte[] UniverseData)
         {
-
-            settings.artnetOutputs[UnityUniverseNumber].DMXData = UniverseData;
+            try
+            {
+                if (settings.artnetOutputs[UnityUniverseNumber] == null) { UnityEngine.Debug.LogError("[Artnet4Unity] DMX Universe Does Not Exist. Have you added a universe via general settings?"); }
+                settings.artnetOutputs[UnityUniverseNumber].DMXData = UniverseData;
+            }catch(Exception e) { UnityEngine.Debug.LogError("[Artnet4Unity] DMX Universe Does Not Exist. Have you added a universe via general settings? | "+ e.Message); }
          }
 
         private void ArtnetThreadLoop()

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace ArtnetForUnity.RDM
 {
-    public class ArtTODRequest : MonoBehaviour
+    public class ArtTODRequest
     {
         byte[] pkt_ID = new byte[8];        //Offset 0
         byte[] pkt_OpCodeLo = new byte[1];  //Offset 8

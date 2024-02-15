@@ -5,7 +5,7 @@ using ArtnetForUnity.RDM;
 
 namespace ArtnetForUnity.RDM
 {
-    public class RdmManager : MonoBehaviour
+    public class RdmManager 
     {
         private ArtnetManager ArtManager;
         private ArtTODRequest ArtTODRequest;

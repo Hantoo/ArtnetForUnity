@@ -139,7 +139,8 @@ namespace ArtnetForUnity
             //pkt_Spare2
             //pkt_spare3
             pkt_Style[0] = (byte)StyleCode.StController;
-            pkt_Mac = ArtUtils.InterfaceMacAddress.GetAddressBytes();
+            if(ArtUtils.InterfaceMacAddress != null)
+                pkt_Mac = ArtUtils.InterfaceMacAddress.GetAddressBytes();
             pkt_BindIP = ArtUtils.InterfaceIPAddress.GetAddressBytes(); //Find better way for root ip identifiction
             pkt_Status2[0] = (byte)(ParseStatus2Byte(false, false, false, false, true, true, ArtUtils.GetDhcp(), false));
             pkt_GoodOutputB = new byte[] { 0xC0, 0xC0, 0xC0, 0xC0 }; // 128 = 1 RDM disabled, 0 RDM Enabled, 64 = 1 Output Continious, 0 output delta, rest of bits not used
