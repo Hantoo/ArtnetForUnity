@@ -10,6 +10,8 @@ using System.Threading;
 using UnityEditor;
 using UnityEngine;
 using ArtnetForUnity.Timecode;
+using ArtnetForUnity.RDM;
+using System.Linq;
 
 namespace ArtnetForUnity
 {
@@ -51,6 +53,19 @@ namespace ArtnetForUnity
         ArtnetSettings settings;
         ArtnetForUnity.IPPacket pkt_ArtSync = new IPPacket();
         public TimecodeManager timecodeManager;
+        public RdmManager rdmManager;
+
+        public float frameRateOfSender;
+        private float[] frameRateOfSenderCompile = new float[10];
+        private int frameRateOfSenderCompileIncrement = 0;
+        public float AvgframeRateOfSenderCompile;
+        private Stopwatch frameRateStopWatch;
+        private float[] frameRateOfPacketQueueCompile = new float[10];
+        private int frameRateOfPacketQueueCompileIncrement = 0;
+        public float AvgframeRateOfPacketQueueCompile;
+        private Stopwatch frameRateOfPacketQueueCompileStopWatch;
+
+        bool Diag_Verbose = false;
 
         private void init()
         {
@@ -60,18 +75,26 @@ namespace ArtnetForUnity
             {
                 ArtUtils.SelectedInterface = networkInterface;
             }
-            //Debug.Log("Using: " + ArtnetForUnity.ArtUtils.InterfaceIPAddress.ToString());
+            
+            //Add Ons
             timecodeManager = new TimecodeManager();
-            timecodeManager.init(this); 
+            timecodeManager.init(this);
+
+            rdmManager = new RdmManager();
+            rdmManager.init(this); 
+
             udpClient = new UdpClient();
             udpClient.ExclusiveAddressUse = false;
             udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-            //udpClient.Client.Bind(endPointSend);
+            udpClient.Client.Bind(endPointSend);
+            udpClient.EnableBroadcast = true;
 
             udpRevcClient = new UdpClient();
             udpRevcClient.ExclusiveAddressUse = false;
             udpRevcClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-            udpRevcClient.Client.Bind(endPointRecv);
+            //udpRevcClient.Client.Bind(endPointRecv);
+            udpRevcClient.Client.Bind(endPointSend);
+            udpRevcClient.EnableBroadcast = true;
 
             RecvCallBack += Recv_Callback;
 
@@ -80,15 +103,23 @@ namespace ArtnetForUnity
             pkt_ArtSync.pktData = artSync.CombinePacket();
             pkt_ArtSync.opCode = OpCodes.OpSync;
             pkt_ArtSync.ipAddress = ArtUtils.broadcastAddress;
+
+            frameRateOfPacketQueueCompileStopWatch = new Stopwatch();
+            frameRateStopWatch = new Stopwatch();
         }
 
         public byte[] _data_PollRequest;
         public byte[] _data_PollRequestReply;
 
         private static ArtnetForUnity.ArtDMXPacket[] ArtnetUniverseValues;
-
-        public void Start(int universesArrayAmount)
+        private bool gameRunning = false;
+        public void Start()
         {
+            //Creates byte array ready for data
+            for (int i = 0; i < settings.artnetOutputs.Count; i++)
+            {
+                settings.artnetOutputs[i].DMXData = new byte[512];
+            }
             isArtnetActive = true;
             artnet = new ArtnetForUnity.ArtDmx();
             artPoll = new ArtnetForUnity.ArtPoll();
@@ -96,22 +127,20 @@ namespace ArtnetForUnity
             artPoll._PriorityCodes = ArtnetForUnity.PriorityCodes.DpMed;
             _data_PollRequest = artPoll.CreateArtPollPacket();
             _data_PollRequestReply = artPollreply.CreateArtPollPacket();
-
-            ArtnetUniverseValues = new ArtnetForUnity.ArtDMXPacket[universesArrayAmount];
+            //Create array or artDMX packets ready to be sent 
+            ArtnetUniverseValues = new ArtnetForUnity.ArtDMXPacket[settings.artnetOutputs.Count];
             new Thread(ArtnetThreadLoop) { IsBackground = true }.Start();
+            gameRunning = Application.isPlaying;
         }
 
-        public void SetArtnetData(int universesArrayIndex, byte[] UniverseData, int Universe, IPAddress[] address = null)
+        public void SetArtnetData(int UnityUniverseNumber, byte[] UniverseData)
         {
-            if(address == null) { address = new IPAddress[] { ArtUtils.broadcastAddress }; }
-            ArtnetForUnity.ArtDMXPacket pkt = new ArtnetForUnity.ArtDMXPacket();
-            pkt.iPAddress = address;
-            pkt.data = UniverseData;
-            pkt.Universe = Universe;
-            ArtnetUniverseValues[universesArrayIndex] = pkt;
-
-
-        }
+            try
+            {
+                if (settings.artnetOutputs[UnityUniverseNumber] == null) { UnityEngine.Debug.LogError("[Artnet4Unity] DMX Universe Does Not Exist. Have you added a universe via general settings?"); }
+                settings.artnetOutputs[UnityUniverseNumber].DMXData = UniverseData;
+            }catch(Exception e) { UnityEngine.Debug.LogError("[Artnet4Unity] DMX Universe Does Not Exist. Have you added a universe via general settings? | "+ e.Message); }
+         }
 
         private void ArtnetThreadLoop()
         {
@@ -122,7 +151,7 @@ namespace ArtnetForUnity
             int millisecondsToSleep = 0;
             ArtnetPollTimer.Start();
             timer.Start();
-            UnityEngine.Debug.Log("Main Loop Thread Started");
+            UnityEngine.Debug.Log("[Artnet4Unity] Main Loop Thread Started");
 
             
 
@@ -138,38 +167,45 @@ namespace ArtnetForUnity
                 //Timecode
                 
                 timecodeManager.Update();
-                
 
-                #if UNITY_STANDALONE
+
+#if UNITY_STANDALONE
                 //Send DMX
-                if (ArtnetUniverseValues != null)
+                if (gameRunning) 
+                if (settings != null && settings.artnetOutputs != null)
+                if (settings.artnetOutputs.Count > 0)
                     try
                     {
-
-                        for (int i = 0; i < ArtnetUniverseValues.Length; i++)
+                        pkt.opCode = ArtnetForUnity.OpCodes.OpDmx;
+                        for (int i = 0; i < settings.artnetOutputs.Count; i++)
                         {
+                            if (settings.artnetOutputs[i].DMXData == null) continue;
+                            if (settings.artnetOutputs[i].DMXData == null || settings.artnetOutputs[i].DMXData.Length == 0) continue;
 
-                            if (ArtnetUniverseValues[i].data == null || ArtnetUniverseValues[i].data.Length == 0) continue;
-                            //pkt = new ArtnetForUnity.IPPacket();
-
-                            pkt.opCode = ArtnetForUnity.OpCodes.OpDmx;
-                            pkt.pktData = dmxPkt.CreateArtDmxPacket(ArtnetUniverseValues[i].data, ArtnetUniverseValues[i].Universe);
-                            for (int _ipIndex = 0; _ipIndex < ArtnetUniverseValues[i].iPAddress.Length; _ipIndex++)
+                            pkt.pktData = dmxPkt.CreateArtDmxPacket(settings.artnetOutputs[i].DMXData, settings.artnetOutputs[i].Universe);
+                            for (int nodeIPIndex = 0; nodeIPIndex < settings.artnetOutputs[i].NodeRevcIPAddress.Count; nodeIPIndex++)
                             {
-                                
-                                pkt.ipAddress = ArtnetUniverseValues[i].iPAddress[_ipIndex];
+                                //TODO: Change this from being parsed every cycle to having IPAddresses defined when saved / on start up
+                                pkt.ipAddress = IPAddress.Parse(settings.artnetOutputs[i].NodeRevcIPAddress[nodeIPIndex]);
                                 AddSenderPkt(pkt);
-
                             }
-
-
-
                         }
+
+                        //Calculate time it's taken to process all the dmx packets and add to sender queue;
+                        frameRateOfPacketQueueCompileStopWatch.Stop();
+                        frameRateOfPacketQueueCompile[frameRateOfPacketQueueCompileIncrement] = frameRateOfPacketQueueCompileStopWatch.ElapsedMilliseconds;
+                        frameRateOfPacketQueueCompileIncrement = (frameRateOfPacketQueueCompileIncrement + 1) % frameRateOfPacketQueueCompile.Length;
+                        AvgframeRateOfPacketQueueCompile = frameRateOfPacketQueueCompile.Average();
+                        ArtUtils.Diagnostic_DMXPacketQueueFrameRate = AvgframeRateOfPacketQueueCompile;
+                        frameRateOfPacketQueueCompileStopWatch.Restart();
+
+
                         if (settings.useArtSync)
                         {
                             AddSenderPkt(pkt_ArtSync);
                         }
-                    }catch(Exception e)
+                    }
+                    catch(Exception e)
 
                     {
                         UnityEngine.Debug.LogError(e);
@@ -202,18 +238,13 @@ namespace ArtnetForUnity
                
                 timer.Restart();
             }
-            UnityEngine.Debug.Log("[Art-Net] Main Loop Thread Finish");
+            UnityEngine.Debug.Log("[Artnet4Unity] Main Loop Thread Finish");
             ArtnetPollTimer.Stop();
         }
 
         public void Stop()
         {
             isArtnetActive = false;
-        }
-
-        private void SendArtPoll()
-        {
-          
         }
 
         private void Recv_Callback()
@@ -227,6 +258,7 @@ namespace ArtnetForUnity
                 device.connected = true;
                 device.ipAddress = pkt.ipAddress;
                 device.name = ArtPollReply.GetName(pkt.pktData);
+                device.bindIndex = ArtPollReply.GetBindIndex(pkt.pktData);
                 CheckArtPortWithDeviceList(device);
             }
 
@@ -258,10 +290,18 @@ namespace ArtnetForUnity
                 {
 
                     IPPacket pkt = SendQueue.Take();
-                    //Debug.Log("Packet:" + pkt.opCode + " | " + pkt.ipAddress.ToString());
+                    //UnityEngine.Debug.Log("Packet:" + pkt.ipAddress + " | " + pkt.ipAddress.ToString());
                     endPointSend = new IPEndPoint(pkt.ipAddress, ArtnetForUnity.ArtUtils.ArtnetPort);
                     //udpClient.Client.Bind(endPointSend);
                     udpClient.Send(pkt.pktData, pkt.pktData.Length, endPointSend);
+
+                    //Calculate time it's taken to process all the dmx packets and add to sender queue;
+                    frameRateStopWatch.Stop();
+                    frameRateOfSenderCompile[frameRateOfSenderCompileIncrement] = frameRateStopWatch.ElapsedMilliseconds;
+                    frameRateOfSenderCompileIncrement = (frameRateOfSenderCompileIncrement + 1) % frameRateOfSenderCompile.Length;
+                    AvgframeRateOfSenderCompile = frameRateOfSenderCompile.Average();
+                    ArtUtils.Diagnostic_SenderFrameRate = AvgframeRateOfSenderCompile;
+                    frameRateStopWatch.Restart();
                 }
             }
             //Debug.Log("Finished Sender Thread");
@@ -280,7 +320,10 @@ namespace ArtnetForUnity
                 IPPacket pkt = new IPPacket();
                 pkt.pktData = udpRevcClient.Receive(ref endPointRecv);
                 pkt.ipAddress = endPointRecv.Address;
+                if(Diag_Verbose)UnityEngine.Debug.Log("Revc Packet From:" + pkt.ipAddress.ToString());
+                if(pkt.pktData.Length < 9) UnityEngine.Debug.Log("Artnet Packet Recvievd Formatted Wrongly pkt.pktData Len:" + pkt.pktData.Length);
                 pkt.opCode = ArtUtils.ByteToOpCode(pkt.pktData[8], pkt.pktData[9]);
+                if(Diag_Verbose)UnityEngine.Debug.Log("Packet Type:" + pkt.opCode.ToString());
                 if (ListenQueue != null)
                 {
                     ListenQueue.Add(pkt);
@@ -301,6 +344,7 @@ namespace ArtnetForUnity
             ListenQueue.CompleteAdding();
             ListenQueue.Dispose();
             timecodeManager.Dispose();
+            rdmManager.Dispose();
         }
 
 
@@ -319,7 +363,7 @@ namespace ArtnetForUnity
             bool found = false;
             for (int i = 0; i < deviceList.Count; i++)
             {
-                if (device.ipAddress.ToString() == deviceList[i].ipAddress.ToString())
+                if ((device.ipAddress.ToString() == deviceList[i].ipAddress.ToString()) && device.bindIndex == deviceList[i].bindIndex)
                 {
                     ArtnetDevice _d = deviceList[i];
                     _d.connected = true;
@@ -395,13 +439,13 @@ namespace ArtnetForUnity
     [Serializable]
     public struct ArtnetDevice
     {
-       
+        
         public string name;
         public string longName;
         public IPAddress ipAddress;
         public bool connected;
         public int offlineTicker;
-
+        public int bindIndex;
         public SubscriberTable subscriberTable;
     }
 
@@ -412,6 +456,7 @@ namespace ArtnetForUnity
     
     public struct SubscriberIndex
     {
+        public int UID;
         public int PortIndex;
         public IPAddress IPAddress;
         public byte NetSwitch;
@@ -429,11 +474,9 @@ namespace ArtnetForUnity
         static ArtnetForUnity.ArtnetManager artnetManager;
         static ArtnetManagerEditor()
         {
-            UnityEngine.Debug.Log("Artnet Manager Started In Editor");
-            //client = new UdpClient();
+            UnityEngine.Debug.Log("[Artnet4Unity] Artnet Manager Started In Editor");
             artnetManager = new ArtnetForUnity.ArtnetManager();
-            artnetManager.Start(1);
-
+            artnetManager.Start();
             EditorApplication.quitting += Quit;
         }
 
@@ -441,17 +484,16 @@ namespace ArtnetForUnity
         {
          
             artnetManager.Stop();
-            
             artnetManager.Dispose();
+            UnityEngine.Debug.Log("[Artnet4Unity] Artnet Manager Stopped In Editor");
 
-            UnityEngine.Debug.Log("Artnet Manager Stopped In Editor");
         }
 
         ~ArtnetManagerEditor()
         {
             artnetManager.Stop();
             artnetManager.Dispose();
-            UnityEngine.Debug.Log("Artnet Manager Stopped In Editor");
+            UnityEngine.Debug.Log("[Artnet4Unity] Artnet Manager Stopped In Editor");
         }
 
     }

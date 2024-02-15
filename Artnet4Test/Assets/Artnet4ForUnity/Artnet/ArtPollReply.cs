@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text;
 using UnityEngine;
+using UnityEngine.XR;
 
 
 namespace ArtnetForUnity
@@ -104,7 +105,7 @@ namespace ArtnetForUnity
             pkt_Status1[0] = (byte)((int)status1_IndicatorState + (int)status1_PortAddressProgrammingAuthority + (int)status1_FirmwareBoot + (int)status1_RDM + (int)status1_UBEA);
             pkt_EstaManLo[0] = ArtUtils.GetLowHighFromInt(ArtUtils.ESTACode)[0];
             pkt_EstaManhi[0] = ArtUtils.GetLowHighFromInt(ArtUtils.ESTACode)[1];
-            pkt_PortName = new byte[] { 0x55, 0x6e, 0x69, 0x74, 0x79, 0x41, 0x72, 0x74, 0x6e, 0x65, 0x74,0x4e,0x6f,0x64,0x65,0x30,0x31};
+            pkt_PortName = Encoding.ASCII.GetBytes(ArtUtils.Truncate(System.Environment.MachineName,18));
             //pkt_LongName
             Array.Copy(pkt_PortName, 0, pkt_LongName, 0, pkt_PortName.Length);
             //pkt_NodeReport
@@ -138,7 +139,8 @@ namespace ArtnetForUnity
             //pkt_Spare2
             //pkt_spare3
             pkt_Style[0] = (byte)StyleCode.StController;
-            pkt_Mac = ArtUtils.InterfaceMacAddress.GetAddressBytes();
+            if(ArtUtils.InterfaceMacAddress != null)
+                pkt_Mac = ArtUtils.InterfaceMacAddress.GetAddressBytes();
             pkt_BindIP = ArtUtils.InterfaceIPAddress.GetAddressBytes(); //Find better way for root ip identifiction
             pkt_Status2[0] = (byte)(ParseStatus2Byte(false, false, false, false, true, true, ArtUtils.GetDhcp(), false));
             pkt_GoodOutputB = new byte[] { 0xC0, 0xC0, 0xC0, 0xC0 }; // 128 = 1 RDM disabled, 0 RDM Enabled, 64 = 1 Output Continious, 0 output delta, rest of bits not used
@@ -218,10 +220,27 @@ namespace ArtnetForUnity
         public static string GetName(byte[] data)
         {
             byte[] PortName = new byte[18];
-            Array.Copy(data,26, PortName, 0, 18);
-            return System.Text.Encoding.ASCII.GetString(PortName);
+            Array.Copy(data, 26, PortName, 0, PortName.Length);
+            //Remove any 0x00 in array as it messes up concat-ing strings
+            for (int i = 0; i < PortName.Length; i++)
+                if (PortName[i] == 0x00) PortName[i] = 0x20;
+            
+           
+            byte[] LongName = new byte[64];
+            Array.Copy(data,44, LongName, 0, LongName.Length);
+            for (int i = 0; i < LongName.Length; i++)
+                if (LongName[i] == 0x00) LongName[i] = 0x20;
+
+           
+            string name = String.Format("[{1}] | {0}",System.Text.Encoding.ASCII.GetString(PortName).TrimEnd().ToString(),(System.Text.Encoding.ASCII.GetString(LongName).TrimEnd().ToString()));
+          
+            return (name); 
         }
 
+        public static int GetBindIndex(byte[] data)
+        {
+            return (int)data[211];
+        }
 
         public struct GoodInput
         {

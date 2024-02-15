@@ -9,8 +9,11 @@ using UnityEngine;
 
 namespace ArtnetForUnity
 {
+    //ToDo: Make artnet settings a static here and when loaded it gets updated here - then all classes that use it pull from here.
     public static class ArtUtils
     {
+        public static float Diagnostic_DMXPacketQueueFrameRate;
+        public static float Diagnostic_SenderFrameRate;
         public static int ArtnetProtocolRevisionNumber = 14;
         public static int ArtnetPort = 6454;
         public static IPAddress InterfaceIPAddress = new IPAddress(new byte[] { 2, 0, 0, 255 }); //Updates on load of settings;
@@ -118,7 +121,13 @@ namespace ArtnetForUnity
         {
             ArtnetSettings loadedSettings = new ArtnetSettings();
             string fileLocation = new System.Diagnostics.StackTrace(true).GetFrame(0).GetFileName();
-            string folderLocation = fileLocation.Substring(0, fileLocation.LastIndexOf('\\')) + "\\";
+            string folderLocation = "";
+#if (UNITY_EDITOR_OSX && UNITY_STANDALONE_OSX)
+            folderLocation = fileLocation.Substring(0, fileLocation.LastIndexOf('/')) + "/";
+#endif
+#if (UNITY_EDITOR_WIN && UNITY_STANDALONE_WIN)
+            folderLocation = fileLocation.Substring(0, fileLocation.LastIndexOf('\\')) + "\\";
+#endif
             string DataLocation = folderLocation + "ArtnetSettings.json";
             if (!File.Exists(DataLocation)) return loadedSettings;
             using (StreamReader sr = File.OpenText(DataLocation))
@@ -196,7 +205,7 @@ namespace ArtnetForUnity
                 Debug.LogError("Network Interface Changed");
                 
                 Debug.LogError("Changing Art-Net Interface to use IP 127.0.0.1" );
-                return new IPAddress(new byte[] { 127,0,0,1 });
+                return new IPAddress(Interfaces[0].GetIPProperties().UnicastAddresses[0].Address.GetAddressBytes());
             }
         }
 
@@ -217,7 +226,14 @@ namespace ArtnetForUnity
             //ArtnetGeneralSettings wnd = GetWindow<ArtnetGeneralSettings>();
             //Find IP In Interfaces
             string fileLocation = new System.Diagnostics.StackTrace(true).GetFrame(0).GetFileName();
-            string folderLocation = fileLocation.Substring(0, fileLocation.LastIndexOf('\\')) + "\\";
+            string folderLocation = "";
+#if (UNITY_EDITOR_OSX && UNITY_STANDALONE_OSX)
+            folderLocation = fileLocation.Substring(0, fileLocation.LastIndexOf('/')) + "/";
+#endif
+#if (UNITY_EDITOR_WIN && UNITY_STANDALONE_WIN)
+            folderLocation = fileLocation.Substring(0, fileLocation.LastIndexOf('\\')) + "\\";
+#endif
+            Debug.Log("folderLocation: " + folderLocation);
             string DataLocation = folderLocation + "ArtnetSettings.json";
             string output = JsonConvert.SerializeObject(settings);
             FileStream fcreate = File.Open(DataLocation, FileMode.Create);
@@ -302,6 +318,24 @@ namespace ArtnetForUnity
         {
             return (b & (1 << pos)) != 0;
         }
+
+        public static byte[] GetPortAddress_HiLo(int Net, int SubNet, int Universe)
+        {
+            byte[] PortAddress = new byte[2];
+            PortAddress[0] = (byte)Net;
+            PortAddress[1] = (byte)(((byte)SubNet << 4) + Universe);
+
+            return PortAddress;
+        }
+
+        public static string? Truncate(this string? value, int maxLength, string truncationSuffix = "…")
+        {
+            return value?.Length > maxLength
+                ? value.Substring(0, maxLength) + truncationSuffix
+                : value;
+        }
+
+        
     }
 
     public enum OpCodes
@@ -390,11 +424,26 @@ namespace ArtnetForUnity
 
 
 
-    public struct ArtnetSettings
+    public class ArtnetSettings
     {
         public string IPAddress;
         public string InterfaceName;
         public bool useArtSync;
+        public List<ArtnetOutputs> artnetOutputs = new List<ArtnetOutputs>();
     }
+
+    public class ArtnetOutputs
+    {
+        public int DMXUniverse;
+        public int Net;
+        public int Subnet;
+        public int Universe;
+        public byte[] DMXData = new byte[512];
+        public List<string> NodeRevcIPAddress = new List<string>();
+
+        //ToDo: Calculate artnet subnet net and universe based on Artnetoutput in settings;
+    }
+
+  
 
 }

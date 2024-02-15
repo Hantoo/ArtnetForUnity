@@ -66,6 +66,17 @@ public class ArtnetGeneralSettings_Functions
         
     }
 
+    public static void AddDMXOutput()
+    {
+
+    }
+
+    public static void RemoveDMXOutput(int UID)
+    {
+
+    }
+
+
     public struct NICInfo
     {
         public string Name;
