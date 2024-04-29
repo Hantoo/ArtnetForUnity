@@ -18,13 +18,9 @@ namespace ArtnetForUnity
 
     public class ArtnetManager : IDisposable
     {
-
+        //If something can be static, and can be disposed of, does that mean its in a qauntum state?
         
-        //// Start is called before the first frame update
-        //void Start()
-        //{
-
-        //}
+      
         public ArtnetManager()
         {
             // start consumer thread here
@@ -50,7 +46,7 @@ namespace ArtnetForUnity
         ArtnetForUnity.ArtPoll artPoll;
         ArtnetForUnity.ArtPollReply artPollreply;
 
-        ArtnetSettings settings;
+        public ArtnetSettings settings;
         ArtnetForUnity.IPPacket pkt_ArtSync = new IPPacket();
         public TimecodeManager timecodeManager;
         public RdmManager rdmManager;
@@ -140,7 +136,15 @@ namespace ArtnetForUnity
                 if (settings.artnetOutputs[UnityUniverseNumber] == null) { UnityEngine.Debug.LogError("[Artnet4Unity] DMX Universe Does Not Exist. Have you added a universe via general settings?"); }
                 settings.artnetOutputs[UnityUniverseNumber].DMXData = UniverseData;
             }catch(Exception e) { UnityEngine.Debug.LogError("[Artnet4Unity] DMX Universe Does Not Exist. Have you added a universe via general settings? | "+ e.Message); }
-         }
+        }
+
+        byte[] EmptyArray = new byte[512];
+        public byte[] GetArtnetData(int UnityDMXNumber)
+        {
+            try {
+                return settings.artnetOutputs[UnityDMXNumber].DMXData;
+            } catch (Exception e) { return EmptyArray; }
+        }
 
         private void ArtnetThreadLoop()
         {

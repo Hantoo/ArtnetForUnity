@@ -128,7 +128,10 @@ namespace ArtnetForUnity
 #if (UNITY_EDITOR_WIN && UNITY_STANDALONE_WIN)
             folderLocation = fileLocation.Substring(0, fileLocation.LastIndexOf('\\')) + "\\";
 #endif
-            string DataLocation = folderLocation + "ArtnetSettings.json";
+
+            //string DataLocation = folderLocation + "ArtnetSettings.json";
+            string DataLocation = Application.streamingAssetsPath + "/Artnet4Unity/ArtnetSettings.json";
+            Debug.LogWarning("Loading Artnet Data From:" + DataLocation);
             if (!File.Exists(DataLocation)) return loadedSettings;
             using (StreamReader sr = File.OpenText(DataLocation))
             {
@@ -234,7 +237,8 @@ namespace ArtnetForUnity
             folderLocation = fileLocation.Substring(0, fileLocation.LastIndexOf('\\')) + "\\";
 #endif
             Debug.Log("folderLocation: " + folderLocation);
-            string DataLocation = folderLocation + "ArtnetSettings.json";
+            //string DataLocation = folderLocation + "ArtnetSettings.json";
+            string DataLocation = Application.streamingAssetsPath + "/Artnet4Unity/ArtnetSettings.json";
             string output = JsonConvert.SerializeObject(settings);
             FileStream fcreate = File.Open(DataLocation, FileMode.Create);
 
