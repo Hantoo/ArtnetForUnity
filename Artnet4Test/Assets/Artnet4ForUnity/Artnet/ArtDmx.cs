@@ -60,6 +60,22 @@ namespace ArtnetForUnity
 
         }
 
+        /// <summary>
+        /// Returns the 15bit Port Address (Net << 8 | SubNet << 4 | Universe) of a received ArtDMX packet.
+        /// </summary>
+        public static int GetUniverse(byte[] pktData)
+        {
+            return pktData[14] | (pktData[15] << 8);
+        }
+
+        /// <summary>
+        /// Returns the number of DMX channels in a received ArtDMX packet.
+        /// </summary>
+        public static int GetDmxLength(byte[] pktData)
+        {
+            return (pktData[16] << 8) | pktData[17];
+        }
+
         private void CompilePacket()
         {
             pkt_fullReturn = new byte[pkt_ID.Length + pkt_OpCodeLo.Length + pkt_OpCodeHi.Length + pkt_ProtVerHi.Length + pkt_ProtVerLo.Length + pkt_Sequence.Length + pkt_Physical.Length + pkt_SubUni.Length + pkt_Net.Length + pkt_LengthHi.Length + pkt_LengthLo.Length + pkt_Data.Length];

@@ -29,6 +29,23 @@ public class ArtnetGeneralSettings : EditorWindow
 
     public List<ArtnetForUnity.ArtnetDevice> artNetNodesList = new List<ArtnetForUnity.ArtnetDevice>();
     public List<ArtnetForUnity.ArtnetOutputs> artNetOutputs = new List<ArtnetForUnity.ArtnetOutputs>();
+    /// <summary>
+    /// Finds a VisualTreeAsset by name wherever the package folder has been placed in the project,
+    /// so hardcoded asset paths don't break when the package is imported to a different location.
+    /// </summary>
+    private static VisualTreeAsset LoadUxml(string assetName)
+    {
+        string[] guids = AssetDatabase.FindAssets(assetName + " t:VisualTreeAsset");
+        foreach (string guid in guids)
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            if (System.IO.Path.GetFileNameWithoutExtension(path) == assetName)
+                return AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(path);
+        }
+        Debug.LogError("[Artnet4Unity] Could not find " + assetName + ".uxml anywhere in the project. Has it been deleted?");
+        return null;
+    }
+
     [MenuItem("Artnet/ArtnetGeneralSettings")]
     public static void ShowExample()
     {
@@ -103,7 +120,7 @@ public class ArtnetGeneralSettings : EditorWindow
         Button RefreshListButton = root.Q<Button>("Button_RefreshList");
         // The "makeItem" function will be called as needed
         // when the ListView needs more items to render
-        var listItem = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Artnet4ForUnity/Unity/Editor/GeneralSettings/ArtnetDevices.uxml");
+        var listItem = LoadUxml("ArtnetDevices");
 
         Func<VisualElement> makeItem = () => listItem.Instantiate();
 
@@ -177,7 +194,7 @@ public class ArtnetGeneralSettings : EditorWindow
     public void AddArtnetNodeIP(VisualElement root,int OutputIndex, int NodeIPIndex = -1)
     {
         
-        var ArtnetDMXIPAddress = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Artnet4ForUnity/Unity/Editor/GeneralSettings/ArtnetDMXIpAddress.uxml");
+        var ArtnetDMXIPAddress = LoadUxml("ArtnetDMXIpAddress");
         var e = ArtnetDMXIPAddress.Instantiate();
         var text_IPAddress = e.Q<TextField>("IPAddressText");
         
@@ -295,7 +312,7 @@ public class ArtnetGeneralSettings : EditorWindow
 
     public void CreateDMXOutputList(VisualElement root, int i)
 {
-        var ArtnetDMXItem = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Artnet4ForUnity/Unity/Editor/GeneralSettings/ArtnetDMX.uxml");
+        var ArtnetDMXItem = LoadUxml("ArtnetDMX");
         
         var e = ArtnetDMXItem.Instantiate();
 
@@ -343,7 +360,8 @@ public class ArtnetGeneralSettings : EditorWindow
 
     public void OnDestroy()
     {
-        EditorCoroutineUtility.StopCoroutine(refreshNodeRoutine);
+        //Can be null if CreateGUI failed before the routine was started
+        if (refreshNodeRoutine != null) EditorCoroutineUtility.StopCoroutine(refreshNodeRoutine);
     }
 
     private void OnNICChange(ChangeEvent<int> evt)

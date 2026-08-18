@@ -16,7 +16,7 @@ public class ArtnetGeneralSettings_Functions
         foreach (NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces())
         {
             NICInfo info = new NICInfo();
-            if (ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 || ni.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
+            if (ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 || ni.NetworkInterfaceType == NetworkInterfaceType.Ethernet || ni.NetworkInterfaceType == NetworkInterfaceType.Loopback)
             {
                 info.Name = ni.Name;
                 foreach (UnicastIPAddressInformation ip in ni.GetIPProperties().UnicastAddresses)
@@ -29,7 +29,8 @@ public class ArtnetGeneralSettings_Functions
                     }
                 }
             }
-            NICList.Add(info);
+            //Only list interfaces that actually have an IPv4 address
+            if (!string.IsNullOrEmpty(info.IPString)) NICList.Add(info);
         }
         return NICList.ToArray();
     }

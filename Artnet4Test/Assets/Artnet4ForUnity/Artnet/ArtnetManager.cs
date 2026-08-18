@@ -21,8 +21,14 @@ namespace ArtnetForUnity
         //If something can be static, and can be disposed of, does that mean its in a qauntum state?
         
       
+        /// <summary>
+        /// The most recently created ArtnetManager. Used by ArtnetDMXInput components to find the running manager.
+        /// </summary>
+        public static ArtnetManager Instance { get; private set; }
+
         public ArtnetManager()
         {
+            Instance = this;
             // start consumer thread here
             init();
             new Thread(SenderThread) { IsBackground = true }.Start();
@@ -30,12 +36,14 @@ namespace ArtnetForUnity
           
         }
 
-        static UdpClient udpClient;
-        static UdpClient udpRevcClient;
+        //One socket per manager, used for both sending and receiving. With multiple sockets bound to the
+        //Art-Net port, unicast packets (e.g. loopback 127.0.0.1) are delivered to only ONE of them - which
+        //may be a socket nobody reads. Broadcast reaches every bound socket, which hid this problem.
+        UdpClient udpClient;
 
-        static IPEndPoint endPointSend = new IPEndPoint(IPAddress.Any, ArtUtils.ArtnetPort);
-        static IPEndPoint endPointRecv = new IPEndPoint(IPAddress.Any, ArtUtils.ArtnetPort);
-        static bool isArtnetActive;
+        IPEndPoint endPointSend = new IPEndPoint(IPAddress.Any, ArtUtils.ArtnetPort);
+        IPEndPoint endPointRecv = new IPEndPoint(IPAddress.Any, ArtUtils.ArtnetPort);
+        bool isArtnetActive;
         private readonly BlockingCollection<IPPacket> SendQueue = new BlockingCollection<IPPacket>(new ConcurrentQueue<IPPacket>());
         private readonly BlockingCollection<IPPacket> ListenQueue = new BlockingCollection<IPPacket>(new ConcurrentQueue<IPPacket>());
         public delegate void ReceiveCallBack();
@@ -50,6 +58,7 @@ namespace ArtnetForUnity
         ArtnetForUnity.IPPacket pkt_ArtSync = new IPPacket();
         public TimecodeManager timecodeManager;
         public RdmManager rdmManager;
+        public ArtnetInputManager inputManager;
 
         public float frameRateOfSender;
         private float[] frameRateOfSenderCompile = new float[10];
@@ -77,20 +86,34 @@ namespace ArtnetForUnity
             timecodeManager.init(this);
 
             rdmManager = new RdmManager();
-            rdmManager.init(this); 
+            rdmManager.init(this);
+
+            inputManager = new ArtnetInputManager();
+            inputManager.init(this);
 
             udpClient = new UdpClient();
             udpClient.ExclusiveAddressUse = false;
             udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-            udpClient.Client.Bind(endPointSend);
+            if (IPAddress.IsLoopback(ArtUtils.InterfaceIPAddress))
+            {
+                //Bind specifically to 127.0.0.1 rather than 0.0.0.0. Other Art-Net applications on this
+                //machine (consoles, DMXWorkshop etc) hold wildcard bindings on the port, and Windows
+                //delivers a unicast packet to the most specific matching socket - a specific binding
+                //guarantees loopback packets reach Unity instead of being swallowed by another app's socket.
+                udpClient.Client.Bind(new IPEndPoint(ArtUtils.InterfaceIPAddress, ArtUtils.ArtnetPort));
+            }
+            else
+            {
+                udpClient.Client.Bind(endPointSend);
+            }
             udpClient.EnableBroadcast = true;
-
-            udpRevcClient = new UdpClient();
-            udpRevcClient.ExclusiveAddressUse = false;
-            udpRevcClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-            //udpRevcClient.Client.Bind(endPointRecv);
-            udpRevcClient.Client.Bind(endPointSend);
-            udpRevcClient.EnableBroadcast = true;
+            //Stop Windows raising ConnectionReset on Receive when a previous send hit a closed port (common on loopback)
+            try
+            {
+                const int SIO_UDP_CONNRESET = -1744830452;
+                udpClient.Client.IOControl((IOControlCode)SIO_UDP_CONNRESET, new byte[] { 0 }, null);
+            }
+            catch { /*Not supported outside Windows*/ }
 
             RecvCallBack += Recv_Callback;
 
@@ -115,6 +138,14 @@ namespace ArtnetForUnity
             for (int i = 0; i < settings.artnetOutputs.Count; i++)
             {
                 settings.artnetOutputs[i].DMXData = new byte[512];
+            }
+            //Enable any DMX inputs defined in settings
+            if (settings.artnetInputs != null)
+            {
+                for (int i = 0; i < settings.artnetInputs.Count; i++)
+                {
+                    inputManager.EnableUniverse(settings.artnetInputs[i].Universe);
+                }
             }
             isArtnetActive = true;
             artnet = new ArtnetForUnity.ArtDmx();
@@ -266,6 +297,11 @@ namespace ArtnetForUnity
                 CheckArtPortWithDeviceList(device);
             }
 
+            if (pkt.opCode == OpCodes.OpDmx)
+            {
+                inputManager.ProcessDmxPacket(pkt);
+            }
+
             if (pkt.opCode == OpCodes.OpTimeCode)
             {
                 ArtnetDevice device;
@@ -273,7 +309,8 @@ namespace ArtnetForUnity
                 //UnityEngine.Debug.Log("pkt.ipAddress:" + pkt.ipAddress.ToString());
                 //UnityEngine.Debug.Log("device.ipAddress:" + device.ipAddress.ToString());
                 //UnityEngine.Debug.Log(", ArtUtils.InterfaceIPAddress:" + ArtUtils.InterfaceIPAddress.ToString());
-                if (pkt.ipAddress.ToString() == ArtUtils.InterfaceIPAddress.ToString()) return;
+                //Ignore our own timecode packets - unless on a loopback interface, where all local apps share the same IP
+                if (!IPAddress.IsLoopback(ArtUtils.InterfaceIPAddress) && pkt.ipAddress.ToString() == ArtUtils.InterfaceIPAddress.ToString()) return;
                 timecodeManager.UpdateCurrentTimecodeFromPacket(timecodeManager.ParseTimecodePacket(pkt, device));
             }
         }
@@ -290,14 +327,27 @@ namespace ArtnetForUnity
             //Debug.Log("Started Sender Thread");
             while (!SendQueue.IsCompleted)
             {
-                if (SendQueue.Count > 0)
                 {
 
-                    IPPacket pkt = SendQueue.Take();
+                    IPPacket pkt;
+                    //Blocks until a packet is queued; throws when the queue is completed or disposed on Dispose
+                    //(InvalidOperationException also covers ObjectDisposedException)
+                    try { pkt = SendQueue.Take(); }
+                    catch (InvalidOperationException) { break; }
                     //UnityEngine.Debug.Log("Packet:" + pkt.ipAddress + " | " + pkt.ipAddress.ToString());
                     endPointSend = new IPEndPoint(pkt.ipAddress, ArtnetForUnity.ArtUtils.ArtnetPort);
                     //udpClient.Client.Bind(endPointSend);
-                    udpClient.Send(pkt.pktData, pkt.pktData.Length, endPointSend);
+                    try
+                    {
+                        udpClient.Send(pkt.pktData, pkt.pktData.Length, endPointSend);
+                    }
+                    catch (SocketException e)
+                    {
+                        //Don't let an unreachable address kill the sender thread - warn once per address
+                        if (failedSendAddresses.Add(pkt.ipAddress.ToString()))
+                            UnityEngine.Debug.LogError("[Artnet4Unity] Could not send to " + pkt.ipAddress + " (" + e.Message + "). Check the node IP addresses in Artnet General Settings match the selected interface.");
+                        continue;
+                    }
 
                     //Calculate time it's taken to process all the dmx packets and add to sender queue;
                     frameRateStopWatch.Stop();
@@ -317,12 +367,14 @@ namespace ArtnetForUnity
 
             while (!ListenQueue.IsCompleted)
             {
-                //if (udpRevcClient.Available > 0)
-                //{
-
-
                 IPPacket pkt = new IPPacket();
-                pkt.pktData = udpRevcClient.Receive(ref endPointRecv);
+                //Receive throws when the socket is closed on Dispose - use that to end the thread
+                try
+                {
+                    pkt.pktData = udpClient.Receive(ref endPointRecv);
+                }
+                catch (SocketException) { if (isDisposed) break; continue; }
+                catch (ObjectDisposedException) { break; }
                 pkt.ipAddress = endPointRecv.Address;
                 if(Diag_Verbose)UnityEngine.Debug.Log("Revc Packet From:" + pkt.ipAddress.ToString());
                 if(pkt.pktData.Length < 9) UnityEngine.Debug.Log("Artnet Packet Recvievd Formatted Wrongly pkt.pktData Len:" + pkt.pktData.Length);
@@ -339,8 +391,11 @@ namespace ArtnetForUnity
             //Debug.Log("Finished Listener Thread");
         }
 
+        private volatile bool isDisposed;
         public void Dispose()
         {
+            if (isDisposed) return;
+            isDisposed = true;
             // this will "complete" GetConsumingEnumerable, so your thread will complete
             isArtnetActive = false;
             SendQueue.CompleteAdding();
@@ -349,6 +404,10 @@ namespace ArtnetForUnity
             ListenQueue.Dispose();
             timecodeManager.Dispose();
             rdmManager.Dispose();
+            inputManager.Dispose();
+            //Release the Art-Net port and unblock the listener thread
+            try { if (udpClient != null) udpClient.Close(); } catch { }
+            if (Instance == this) Instance = null;
         }
 
 
@@ -397,6 +456,7 @@ namespace ArtnetForUnity
             return false;
         }
 
+        private readonly HashSet<string> failedSendAddresses = new HashSet<string>();
         List<int> removeDevicesAtIndex = new List<int>();
         private void RefreshDeviceList()
         {
@@ -478,26 +538,43 @@ namespace ArtnetForUnity
         static ArtnetForUnity.ArtnetManager artnetManager;
         static ArtnetManagerEditor()
         {
+            //Don't bind the Art-Net port while entering play mode - runtime managers own it during play
+            if (!EditorApplication.isPlayingOrWillChangePlaymode)
+            {
+                CreateManager();
+            }
+            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+            EditorApplication.quitting += Quit;
+        }
+
+        private static void CreateManager()
+        {
+            if (artnetManager != null) return;
             UnityEngine.Debug.Log("[Artnet4Unity] Artnet Manager Started In Editor");
             artnetManager = new ArtnetForUnity.ArtnetManager();
             artnetManager.Start();
-            EditorApplication.quitting += Quit;
+        }
+
+        private static void DisposeManager()
+        {
+            if (artnetManager == null) return;
+            artnetManager.Stop();
+            artnetManager.Dispose();
+            artnetManager = null;
+            UnityEngine.Debug.Log("[Artnet4Unity] Artnet Manager Stopped In Editor");
+        }
+
+        private static void OnPlayModeStateChanged(PlayModeStateChange state)
+        {
+            //Release the port before play starts so the game's own ArtnetManager is the only one bound to it,
+            //then take it back when returning to edit mode (for the editor windows / node discovery)
+            if (state == PlayModeStateChange.ExitingEditMode) DisposeManager();
+            if (state == PlayModeStateChange.EnteredEditMode) CreateManager();
         }
 
         public static void Quit()
         {
-         
-            artnetManager.Stop();
-            artnetManager.Dispose();
-            UnityEngine.Debug.Log("[Artnet4Unity] Artnet Manager Stopped In Editor");
-
-        }
-
-        ~ArtnetManagerEditor()
-        {
-            artnetManager.Stop();
-            artnetManager.Dispose();
-            UnityEngine.Debug.Log("[Artnet4Unity] Artnet Manager Stopped In Editor");
+            DisposeManager();
         }
 
     }

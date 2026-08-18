@@ -58,6 +58,36 @@ We have the index number as 0 since we only initalised 1 universe above, therefo
     artnetManager.SetArtnetData(0, _data);
 ```
 
+## Receiving DMX (Art-Net Input)
+Incoming ArtDMX universes can be read into Unity. Each enabled universe is exposed as a ````NativeArray<float>```` of 512 channels (normalized 0f - 1f by default).
+
+The simplest way to enable a universe is to add the **Artnet DMX Input** component (````ArtnetDMXInput````) to a GameObject and set the Universe number to the Art-Net Port Address the sender is outputting on. The component enables the universe while it is active and reading it is as simple as:
+```
+    public ArtnetDMXInput dmxInput;
+
+    void Update()
+    {
+        NativeArray<float> universe = dmxInput.DMXData; //512 floats, 0f - 1f
+        float chan1 = dmxInput.GetChannel(1);           //Single channel, 1 - 512
+    }
+```
+An example script, InputTester.cs, is included in the project.
+
+To monitor incoming data, open **Artnet > DMX Universe Viewer**. It shows all 512 channels of a universe as a table, with each cell fading from black (0) to orange (full). Type in the universe you want to watch and it will be enabled automatically while the window is open. You can also point it at your own data by calling ````DMXUniverseViewer.ShowWindow(myNativeArray)```` with any 512 element ````NativeArray<float>````.
+
+If you'd rather not use a component, universes can also be enabled directly on the manager:
+```
+    artnetManager.inputManager.EnableUniverse(0);                            //Start receiving universe 0
+    NativeArray<float> universe = artnetManager.inputManager.GetUniverseData(0); //Read it (call from the main thread)
+    artnetManager.inputManager.DisableUniverse(0);                           //Stop receiving
+```
+Notes:
+* Values are normalized 0f - 1f. Set ````artnetManager.inputManager.NormalizeData = false```` for raw 0 - 255 values, or use ````GetUniverseBytes()```` for the raw bytes.
+* The returned NativeArray is owned by the input manager - do not Dispose it yourself.
+* By default, packets sent from the same IP as the selected Art-Net interface are ignored so Unity doesn't read back its own broadcast output. Set ````artnetManager.inputManager.IgnoreOwnPackets = false```` if you want to receive from another application on the same machine.
+* Loopback adapters (127.0.0.1) are supported and can be selected in General Settings - useful for receiving Art-Net from a console or DMXWorkshop running on the same machine. When on loopback, Unity binds the Art-Net port specifically to 127.0.0.1 so that incoming packets are reliably delivered to Unity rather than another application's socket (Windows gives unicast packets to the most specific binding on a shared port). Two caveats follow from this: treat loopback as receive-only (other local Art-Net applications won't reliably receive Unity's output - use a real NIC for that), and avoid outputting a universe number you are also inputting, as Unity can receive its own output back (the own-packet filter can't tell local applications apart on loopback).
+* You can subscribe to ````artnetManager.inputManager.OnUniverseReceived```` to be notified when a packet arrives for an enabled universe (note: this fires on the network listener thread, not the Unity main thread).
+
 ## Packets
 ### ArtTimecode
 ArtTimecode is implemented and allows for you to recieve or send ArtTimecode. 

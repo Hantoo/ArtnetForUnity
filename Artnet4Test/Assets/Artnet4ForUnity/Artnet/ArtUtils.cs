@@ -142,8 +142,16 @@ namespace ArtnetForUnity
             //Debug.Log("ipaddress: " + ipaddress.ToString());
             InterfaceIPAddress = checkNICExists(ipaddress);
             //Debug.Log("InterfaceIPAddress: " + InterfaceIPAddress.ToString()) ;
-            System.Net.IPAddress subnetMask = getSubnetMask(ipaddress);
-            broadcastAddress = GetBroadcastAddress(ipaddress, subnetMask);
+            if (System.Net.IPAddress.IsLoopback(InterfaceIPAddress))
+            {
+                //Windows rejects sends to 127.255.255.255 with "unreachable network" - on loopback, send straight to the loopback address instead
+                broadcastAddress = InterfaceIPAddress;
+            }
+            else
+            {
+                System.Net.IPAddress subnetMask = getSubnetMask(ipaddress);
+                broadcastAddress = GetBroadcastAddress(ipaddress, subnetMask);
+            }
             try
             {
                 getMACAddress(ipaddress);
@@ -239,6 +247,8 @@ namespace ArtnetForUnity
             Debug.Log("folderLocation: " + folderLocation);
             //string DataLocation = folderLocation + "ArtnetSettings.json";
             string DataLocation = Application.streamingAssetsPath + "/Artnet4Unity/ArtnetSettings.json";
+            //Create the StreamingAssets/Artnet4Unity folder if it doesn't exist yet (e.g. first save in a new project)
+            Directory.CreateDirectory(Path.GetDirectoryName(DataLocation));
             string output = JsonConvert.SerializeObject(settings);
             FileStream fcreate = File.Open(DataLocation, FileMode.Create);
 
@@ -332,7 +342,7 @@ namespace ArtnetForUnity
             return PortAddress;
         }
 
-        public static string? Truncate(this string? value, int maxLength, string truncationSuffix = "…")
+        public static string? Truncate(this string? value, int maxLength, string truncationSuffix = "ï¿½")
         {
             return value?.Length > maxLength
                 ? value.Substring(0, maxLength) + truncationSuffix
@@ -434,6 +444,7 @@ namespace ArtnetForUnity
         public string InterfaceName;
         public bool useArtSync;
         public List<ArtnetOutputs> artnetOutputs = new List<ArtnetOutputs>();
+        public List<ArtnetInputs> artnetInputs = new List<ArtnetInputs>();
     }
 
     public class ArtnetOutputs
@@ -446,6 +457,13 @@ namespace ArtnetForUnity
         public List<string> NodeRevcIPAddress = new List<string>();
 
         //ToDo: Calculate artnet subnet net and universe based on Artnetoutput in settings;
+    }
+
+    public class ArtnetInputs
+    {
+        public int Net;
+        public int Subnet;
+        public int Universe; //Port Address of the universe to receive, matching the Universe field of ArtnetOutputs
     }
 
   

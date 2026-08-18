@@ -256,7 +256,7 @@ namespace ArtnetForUnity.Timecode
     public class TimecodeTime 
     {
        
-        [SerializeField]
+        
         public ArtTimecode tc { get; set; }
     }
 
